@@ -276,20 +276,36 @@ interface AsyncListParams extends PaginationParams {
 export class VoyantDataClient {
   readonly transport: VoyantTransport;
 
-  readonly static = this.buildStatic();
-  readonly fx = this.buildFx();
-  readonly seo = this.buildSeo();
-  readonly reviews = this.buildReviews();
-  readonly hotels = this.buildHotels();
-  readonly restaurants = {
-    tripadvisor: this.buildTripadvisorVertical(RESTAURANTS),
+  readonly static: ReturnType<VoyantDataClient["buildStatic"]>;
+  readonly fx: ReturnType<VoyantDataClient["buildFx"]>;
+  readonly seo: ReturnType<VoyantDataClient["buildSeo"]>;
+  readonly reviews: ReturnType<VoyantDataClient["buildReviews"]>;
+  readonly hotels: ReturnType<VoyantDataClient["buildHotels"]>;
+  readonly restaurants: {
+    tripadvisor: ReturnType<VoyantDataClient["buildTripadvisorVertical"]>;
   };
-  readonly experiences = {
-    tripadvisor: this.buildTripadvisorVertical(EXPERIENCES),
+  readonly experiences: {
+    tripadvisor: ReturnType<VoyantDataClient["buildTripadvisorVertical"]>;
   };
 
+  /**
+   * Namespaces are constructed in the body after `this.transport` is wired —
+   * not as class field initializers — because field initializers fire before
+   * the constructor body, so they would close over an `undefined` transport.
+   */
   constructor(options: VoyantDataClientOptions) {
     this.transport = new VoyantTransport(options);
+    this.static = this.buildStatic();
+    this.fx = this.buildFx();
+    this.seo = this.buildSeo();
+    this.reviews = this.buildReviews();
+    this.hotels = this.buildHotels();
+    this.restaurants = {
+      tripadvisor: this.buildTripadvisorVertical(RESTAURANTS),
+    };
+    this.experiences = {
+      tripadvisor: this.buildTripadvisorVertical(EXPERIENCES),
+    };
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -531,10 +547,15 @@ export class VoyantDataClient {
             ),
         },
         organic: {
-          searches: this.buildSearchFeature<GoogleOrganicSearchInput>(
-            `${SEO}/serp/google/organic`,
-            { screenshot: true, aiSummary: true },
-          ),
+          searches: {
+            ...this.buildSearchFeature<GoogleOrganicSearchInput>(
+              `${SEO}/serp/google/organic`,
+            ),
+            screenshot: this.buildScreenshotMethod(
+              `${SEO}/serp/google/organic`,
+            ),
+            aiSummary: this.buildAiSummaryMethod(`${SEO}/serp/google/organic`),
+          },
         },
         aiMode: {
           languages: {
@@ -544,22 +565,33 @@ export class VoyantDataClient {
                 { unwrapData: false },
               ),
           },
-          searches: this.buildSearchFeature<GoogleAiModeSearchInput>(
-            `${SEO}/serp/google/ai-mode`,
-            { screenshot: true, aiSummary: true },
-          ),
+          searches: {
+            ...this.buildSearchFeature<GoogleAiModeSearchInput>(
+              `${SEO}/serp/google/ai-mode`,
+            ),
+            screenshot: this.buildScreenshotMethod(
+              `${SEO}/serp/google/ai-mode`,
+            ),
+            aiSummary: this.buildAiSummaryMethod(`${SEO}/serp/google/ai-mode`),
+          },
         },
         autocomplete: {
           searches: this.buildSearchFeature<GoogleAutocompleteSearchInput>(
             `${SEO}/serp/google/autocomplete`,
-            { screenshot: false, aiSummary: false },
           ),
         },
         maps: {
-          searches: this.buildSearchFeature<GoogleMapsSearchInput>(
-            `${SEO}/serp/google/maps`,
-            { screenshot: false, aiSummary: true },
-          ),
+          searches: {
+            ...this.buildSearchFeature<GoogleMapsSearchInput>(
+              `${SEO}/serp/google/maps`,
+            ),
+            // Both screenshot and ai-summary URLs are mounted by the worker,
+            // although the screenshot handler returns FEATURE_NOT_SUPPORTED
+            // at our edge for Maps (no HTML payload upstream). Exposing them
+            // keeps the client surface aligned with the public manifest.
+            screenshot: this.buildScreenshotMethod(`${SEO}/serp/google/maps`),
+            aiSummary: this.buildAiSummaryMethod(`${SEO}/serp/google/maps`),
+          },
         },
         adsSearch: {
           locations: {
@@ -576,7 +608,6 @@ export class VoyantDataClient {
           },
           searches: this.buildSearchFeature<GoogleAdsSearchInput>(
             `${SEO}/serp/google/ads-search`,
-            { screenshot: false, aiSummary: false },
           ),
         },
         adsAdvertisers: {
@@ -594,19 +625,22 @@ export class VoyantDataClient {
           },
           searches: this.buildSearchFeature<GoogleAdsAdvertisersSearchInput>(
             `${SEO}/serp/google/ads-advertisers`,
-            { screenshot: false, aiSummary: false },
           ),
         },
       },
     };
   }
 
-  private buildSearchFeature<TInput>(
-    base: string,
-    flags: { screenshot: boolean; aiSummary: boolean },
-  ) {
+  /**
+   * Common create / get / listReady trio shared by every SERP feature. The
+   * screenshot + ai-summary actions are added separately by `buildSerp` for
+   * the features that support them upstream — keeping them out of this
+   * helper so route-coverage verification doesn't see optional methods that
+   * map to non-existent worker routes.
+   */
+  private buildSearchFeature<TInput>(base: string) {
     const t = this.transport;
-    const searches = {
+    return {
       create: (request: TInput) =>
         t.request<SingleResponse<Search>>(`${base}/searches`, {
           method: "POST",
@@ -622,44 +656,33 @@ export class VoyantDataClient {
           query: { ready: true, ...params },
           unwrapData: false,
         }),
-    } as {
-      create: (request: TInput) => Promise<SingleResponse<Search>>;
-      get: (id: string) => Promise<SingleResponse<Search>>;
-      listReady: (
-        params?: PaginationParams,
-      ) => Promise<ListResponse<Search>>;
-      screenshot?: (
-        id: string,
-        request?: ScreenshotInput,
-      ) => Promise<SingleResponse<ScreenshotResult>>;
-      aiSummary?: (
-        id: string,
-        request?: AiSummaryInput,
-      ) => Promise<SingleResponse<AiSummaryResult>>;
     };
-    if (flags.screenshot) {
-      searches.screenshot = (id: string, request?: ScreenshotInput) =>
-        t.request<SingleResponse<ScreenshotResult>>(
-          `${base}/searches/${enc(id)}/screenshot`,
-          {
-            method: "POST",
-            body: (request ?? {}) as object,
-            unwrapData: false,
-          },
-        );
-    }
-    if (flags.aiSummary) {
-      searches.aiSummary = (id: string, request?: AiSummaryInput) =>
-        t.request<SingleResponse<AiSummaryResult>>(
-          `${base}/searches/${enc(id)}/ai-summary`,
-          {
-            method: "POST",
-            body: (request ?? {}) as object,
-            unwrapData: false,
-          },
-        );
-    }
-    return searches;
+  }
+
+  private buildScreenshotMethod(base: string) {
+    const t = this.transport;
+    return (id: string, request?: ScreenshotInput) =>
+      t.request<SingleResponse<ScreenshotResult>>(
+        `${base}/searches/${enc(id)}/screenshot`,
+        {
+          method: "POST",
+          body: (request ?? {}) as object,
+          unwrapData: false,
+        },
+      );
+  }
+
+  private buildAiSummaryMethod(base: string) {
+    const t = this.transport;
+    return (id: string, request?: AiSummaryInput) =>
+      t.request<SingleResponse<AiSummaryResult>>(
+        `${base}/searches/${enc(id)}/ai-summary`,
+        {
+          method: "POST",
+          body: (request ?? {}) as object,
+          unwrapData: false,
+        },
+      );
   }
 
   private buildKeywordsData() {
