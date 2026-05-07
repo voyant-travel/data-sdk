@@ -1,6 +1,6 @@
 # Auth And Transport
 
-`@voyantjs/cloud-sdk` is built on an internal transport layer shared with
+`@voyantjs/data-sdk` is built on an internal transport layer shared with
 sibling SDK packages.
 
 ## Default behavior
@@ -12,7 +12,7 @@ sibling SDK packages.
 
 ## Client options
 
-`@voyantjs/cloud-sdk` accepts transport-level options such as:
+`@voyantjs/data-sdk` accepts transport-level options such as:
 
 - `apiKey`
 - `baseUrl`
@@ -33,16 +33,23 @@ sibling SDK packages.
 
 - JSON responses are parsed automatically
 - plain text that looks like JSON is parsed defensively
-- `{ data: ... }` envelopes are unwrapped by default
-- callers can opt out with `unwrapData: false`
+- the data SDK preserves the full `{ data, totalCount, nextCursor? }`
+  envelope on list endpoints and `{ data }` on single-item endpoints, so
+  consumers can paginate without losing metadata
 
 ## Errors
 
-Non-2xx responses throw `VoyantApiError`, which includes:
+Non-2xx responses throw `VoyantApiError` from `@voyant-sdk/sdk-core`, which
+includes:
 
 - `status`
 - `requestId`
 - `body`
+
+The Voyant Data API also returns a stable `code` on its error bodies; see
+the `DataErrorCode` type for the supported set (`NOT_FOUND`,
+`INVALID_REQUEST`, `INVALID_CURSOR`, `UPSTREAM_FAILED`,
+`INTERNAL_AUTH_REQUIRED`, `RATE_LIMITED`).
 
 The request ID should be preserved in logs and support requests whenever
 possible.

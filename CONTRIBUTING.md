@@ -1,6 +1,6 @@
 # Contributing
 
-This repo publishes public TypeScript SDK packages for hosted Voyant products.
+This repo publishes the public TypeScript SDK for the Voyant Data APIs.
 
 ## Scope
 
@@ -31,5 +31,6 @@ Changes here should not pull in private `voyant-cloud` implementation details.
 
 ## Contract updates
 
-When the API contract changes in `voyant-cloud`, update the relevant SDK package
-without importing private application code directly.
+When the API contract changes in `voyant-cloud`, run `pnpm sync:contracts`
+and update the relevant SDK package without importing private application
+code directly.

@@ -123,9 +123,9 @@ function verifyPrivatePackage(relativePath) {
 }
 
 verifyRootPackage();
-verifyPublicPackage("packages/cloud-sdk/package.json", {
-  name: "@voyantjs/cloud-sdk",
-  descriptionKeyword: "Voyant Cloud",
+verifyPublicPackage("packages/data-sdk/package.json", {
+  name: "@voyantjs/data-sdk",
+  descriptionKeyword: "Voyant Data",
 });
 verifyPrivatePackage("packages/sdk-core/package.json");
 

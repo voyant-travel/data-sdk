@@ -7,19 +7,17 @@ const repoRoot = path.resolve(import.meta.dirname, "..");
 const voyantCloudRepo = path.resolve(repoRoot, "../voyant-cloud");
 const manifestFile = path.join(repoRoot, "generated", "public-routes.json");
 
-const vaultRoutesFile = path.join(
-  voyantCloudRepo,
-  "apps/api/src/routes/vault.ts",
-);
-const smsRoutesFile = path.join(voyantCloudRepo, "apps/api/src/routes/sms.ts");
-const emailRoutesFile = path.join(
-  voyantCloudRepo,
-  "apps/api/src/routes/email.ts",
-);
-const verifyRoutesFile = path.join(
-  voyantCloudRepo,
-  "apps/api/src/routes/verify.ts",
-);
+const STATIC_ROUTE_FILES = [
+  "apps/data-static-api/src/routes/aircraft.ts",
+  "apps/data-static-api/src/routes/airlines.ts",
+  "apps/data-static-api/src/routes/airports.ts",
+  "apps/data-static-api/src/routes/cities.ts",
+  "apps/data-static-api/src/routes/countries.ts",
+  "apps/data-static-api/src/routes/reference.ts",
+  "apps/data-static-api/src/routes/regions.ts",
+];
+
+const FX_MANIFEST_FILE = "apps/data-fx-api/src/routes/fx-manifest.ts";
 
 function fileExists(filePath) {
   return fs.existsSync(filePath);
@@ -31,17 +29,26 @@ function joinPath(prefix, suffix) {
   return `${prefix}${suffix.startsWith("/") ? "" : "/"}${suffix}`;
 }
 
-function extractRoutes(filePath, pathPrefix = "") {
+/**
+ * Same extraction shape as `sync-route-manifests.mjs` so the two scripts
+ * agree on what counts as a public route.
+ */
+function extractAppRoutes(filePath, publicPrefix) {
   const source = fs.readFileSync(filePath, "utf8");
-  return new Set(
-    [
-      ...source.matchAll(
-        /\bapp\.(get|post|patch|delete|put)\(\s*"([^"]+)"/gs,
-      ),
-    ].map(
+  return [
+    ...source.matchAll(/\bapp\.(get|post|patch|delete|put)\(\s*"([^"]+)"/gs),
+  ]
+    .filter(([, , route]) => !route.includes("/v1/internal"))
+    .map(
       ([, method, route]) =>
-        `${method.toUpperCase()} ${joinPath(pathPrefix, route)}`,
-    ),
+        `${method.toUpperCase()} ${joinPath(publicPrefix, route)}`,
+    );
+}
+
+function extractManifestRoutes(filePath, publicPrefix) {
+  const source = fs.readFileSync(filePath, "utf8");
+  return [...source.matchAll(/[a-z]+\(\s*"(\/v1\/[^"]+)"/g)].map(
+    ([, route]) => `GET ${joinPath(publicPrefix, route)}`,
   );
 }
 
@@ -68,10 +75,8 @@ function verifyManifest(label, actualRoutes, expectedRoutes) {
 
 const requiredFiles = [
   manifestFile,
-  vaultRoutesFile,
-  smsRoutesFile,
-  emailRoutesFile,
-  verifyRoutesFile,
+  ...STATIC_ROUTE_FILES.map((rel) => path.join(voyantCloudRepo, rel)),
+  path.join(voyantCloudRepo, FX_MANIFEST_FILE),
 ];
 
 if (!requiredFiles.every(fileExists)) {
@@ -83,13 +88,19 @@ if (!requiredFiles.every(fileExists)) {
 
 const manifest = JSON.parse(fs.readFileSync(manifestFile, "utf8"));
 
-const actualCloudRoutes = new Set([
-  ...extractRoutes(vaultRoutesFile, "/vault/v1"),
-  ...extractRoutes(smsRoutesFile, "/sms/v1"),
-  ...extractRoutes(emailRoutesFile, "/email/v1"),
-  ...extractRoutes(verifyRoutesFile, "/verify/v1"),
-]);
+const actualStaticRoutes = new Set(
+  STATIC_ROUTE_FILES.flatMap((rel) =>
+    extractAppRoutes(path.join(voyantCloudRepo, rel), "/data/static"),
+  ),
+);
+const actualFxRoutes = new Set(
+  extractManifestRoutes(
+    path.join(voyantCloudRepo, FX_MANIFEST_FILE),
+    "/data/fx",
+  ),
+);
 
-verifyManifest("Cloud", actualCloudRoutes, new Set(manifest.cloud));
+verifyManifest("Static", actualStaticRoutes, new Set(manifest.static));
+verifyManifest("FX", actualFxRoutes, new Set(manifest.fx));
 
-console.log("API parity verification passed for Cloud routes.");
+console.log("API parity verification passed for Static and FX routes.");

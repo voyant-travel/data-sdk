@@ -1,19 +1,21 @@
-# Voyant Cloud SDK
+# Voyant Data SDK
 
-Public TypeScript SDK for Voyant Cloud APIs.
+Public TypeScript SDK for the Voyant Data APIs.
 
-This repo owns the `@voyantjs/cloud-sdk` package and its supporting contract
+This repo owns the `@voyantjs/data-sdk` package and its supporting contract
 tooling. It does not contain a docs app. For now, repo documentation lives as
 Markdown under [`docs/`](./docs).
 
 ## Packages
 
-- `@voyantjs/cloud-sdk`: client for Voyant Cloud vault, sms, and verification APIs
-- `@voyant-sdk/sdk-core`: private shared runtime bundled into the public package
+- `@voyantjs/data-sdk`: client for the Voyant Data APIs (`/data/static`,
+  `/data/fx`, `/data/seo`)
+- `@voyant-sdk/sdk-core`: private shared runtime bundled into the public
+  package
 
 ## Workspace layout
 
-- `packages/cloud-sdk`: public Voyant Cloud SDK
+- `packages/data-sdk`: public Voyant Data SDK
 - `packages/sdk-core`: shared internal transport, auth, and error handling
 - `packages/eslint-config`: shared ESLint presets for the workspace
 - `packages/typescript-config`: shared TypeScript presets for the workspace
@@ -55,5 +57,5 @@ pnpm release
 - [Publishing](./docs/publishing.md)
 - [Package APIs](./docs/package-apis.md)
 - [FAQ](./docs/faq.md)
-- [Cloud SDK](./docs/cloud.md)
+- [Data SDK](./docs/data.md)
 - [Roadmap](./ROADMAP.md)

@@ -8,7 +8,7 @@ rather than application behavior.
 - auth header construction
 - query parameter serialization
 - JSON request body encoding
-- response envelope unwrapping
+- response envelope handling
 - non-JSON response handling
 - API error construction
 - package export shape
@@ -23,7 +23,7 @@ rather than application behavior.
 ## Recommended layers
 
 - unit tests for `sdk-core` transport behavior
-- package tests for Cloud client method wiring
+- package tests for Data client method wiring
 - fixture-based response tests for common endpoint shapes
 - publish verification tests for package exports and built files
 
@@ -32,13 +32,13 @@ rather than application behavior.
 The repo includes Node-native smoke tests under `tests/` that exercise:
 
 - `sdk-core` transport behavior against mocked `fetch`
-- Cloud route composition
-- raw envelope handling for endpoints that opt out of default unwrapping
+- Data client route composition (`countries`, `airports`, `fx`, `seo`)
+- envelope handling for list and single-item endpoints
 
 ## Good test boundaries
 
 - `sdk-core` should be tested with mocked `fetch`
-- `@voyantjs/cloud-sdk` should verify route composition and option forwarding
+- `@voyantjs/data-sdk` should verify route composition and option forwarding
 
 ## Contract drift
 

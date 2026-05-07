@@ -2,7 +2,7 @@
 
 ## Packages intended for publish
 
-- `@voyantjs/cloud-sdk`
+- `@voyantjs/data-sdk`
 
 ## Private workspace packages
 

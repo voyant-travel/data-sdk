@@ -1,10 +1,10 @@
 # Repo Decisions
 
-`cloud-sdk` exists to publish the public `@voyantjs/cloud-sdk` package.
+`data-sdk` exists to publish the public `@voyantjs/data-sdk` package.
 
 ## What belongs here
 
-- the public `@voyantjs/cloud-sdk` package
+- the public `@voyantjs/data-sdk` package
 - shared SDK runtime code consumed by that package
 - package-level tests
 - lightweight Markdown documentation
@@ -21,11 +21,12 @@ generation.
 
 ## Package boundaries
 
-- `@voyantjs/cloud-sdk` is for Voyant Cloud services
+- `@voyantjs/data-sdk` is for the Voyant Data product (`/data/static`,
+  `/data/fx`, `/data/seo`)
 - `@voyant-sdk/sdk-core` is private and should contain only transport-level
   concerns
 
 ## Scope rule
 
 - no product-specific business logic in `sdk-core`
-- docs and examples should stay scoped to the Cloud surface
+- docs and examples should stay scoped to the Data surface

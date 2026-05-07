@@ -5,7 +5,7 @@ import ts from "typescript";
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 const routesFile = path.join(repoRoot, "generated", "public-routes.json");
-const cloudClientFile = path.join(repoRoot, "packages", "cloud-sdk", "src", "client.ts");
+const dataClientFile = path.join(repoRoot, "packages", "data-sdk", "src", "client.ts");
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -21,21 +21,39 @@ function normalizeRoute(route) {
 }
 
 function resolveStringExpression(expression, sourceFile) {
-  if (ts.isStringLiteral(expression) || ts.isNoSubstitutionTemplateLiteral(expression)) {
+  if (
+    ts.isStringLiteral(expression) ||
+    ts.isNoSubstitutionTemplateLiteral(expression)
+  ) {
     return expression.text;
   }
 
   if (ts.isTemplateExpression(expression)) {
-    return expression.head.text + expression.templateSpans
-      .map((span) => `:${span.expression.getText(sourceFile)}${span.literal.text}`)
-      .join("");
+    return (
+      expression.head.text +
+      expression.templateSpans
+        .map((span) => `:${span.expression.getText(sourceFile)}${span.literal.text}`)
+        .join("")
+    );
   }
 
   return null;
 }
 
-function resolveRouteExpression(expression, sourceFile) {
-  return resolveStringExpression(expression, sourceFile);
+/**
+ * The data client conditionally swaps between two template paths to model
+ * the optional `:amount` segment on `fx.pair` and `fx.history`. Both arms
+ * count as real public routes — extract each branch independently.
+ */
+function resolveRouteExpressions(expression, sourceFile) {
+  if (ts.isConditionalExpression(expression)) {
+    return [
+      ...resolveRouteExpressions(expression.whenTrue, sourceFile),
+      ...resolveRouteExpressions(expression.whenFalse, sourceFile),
+    ];
+  }
+  const single = resolveStringExpression(expression, sourceFile);
+  return single ? [single] : [];
 }
 
 function resolveRequestMethod(callExpression) {
@@ -60,22 +78,84 @@ function resolveRequestMethod(callExpression) {
   return "GET";
 }
 
+/**
+ * Each `${...}` slot in a client route template is always a complete path
+ * segment, so collapse any segment that starts with `:` (a leftover slot)
+ * down to `:param`. This handles nested calls like
+ * `${encodeURIComponent(String(amount))}` without writing a balanced-paren
+ * regex.
+ */
+function normalizeTemplateBoundaries(routePath) {
+  return routePath
+    .split("/")
+    .map((segment) => (segment.startsWith(":") ? ":param" : segment))
+    .join("/");
+}
+
+/**
+ * The client uses two top-level constants for the path prefixes; resolve
+ * them so routes are comparable to the manifest entries.
+ */
+function resolvePrefixConstants(sourceFile) {
+  const prefixes = new Map();
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer &&
+      (ts.isStringLiteral(node.initializer) ||
+        ts.isNoSubstitutionTemplateLiteral(node.initializer))
+    ) {
+      prefixes.set(node.name.text, node.initializer.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(sourceFile);
+  return prefixes;
+}
+
+function expandPrefixes(route, prefixes) {
+  let result = route;
+  for (const [name, value] of prefixes) {
+    result = result.replaceAll(`:${name}`, value);
+  }
+  return result;
+}
+
 function extractClientRoutes(filePath) {
   const source = fs.readFileSync(filePath, "utf8");
-  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const prefixes = resolvePrefixConstants(sourceFile);
   const routes = new Set();
 
   function visit(node) {
     if (
       ts.isCallExpression(node) &&
       ts.isPropertyAccessExpression(node.expression) &&
-      node.expression.name.text === "request"
+      node.expression.name.text === "request" &&
+      // Only count direct transport calls — skip the generic `seo.request`
+      // forwarder, which routes through the same name but is intentionally
+      // dynamic and not subject to per-route parity.
+      ts.isPropertyAccessExpression(node.expression.expression) &&
+      node.expression.expression.name.text === "transport"
     ) {
-      const routePath = resolveRouteExpression(node.arguments[0], sourceFile);
-
-      if (routePath) {
-        const method = resolveRequestMethod(node).toUpperCase();
-        routes.add(`${method} ${routePath}`);
+      const method = resolveRequestMethod(node).toUpperCase();
+      for (const rawPath of resolveRouteExpressions(node.arguments[0], sourceFile)) {
+        const expanded = expandPrefixes(rawPath, prefixes);
+        // SEO is exposed as a generic typed pass-through (`seo.request`),
+        // not as per-route methods. The compiled path is intentionally
+        // dynamic — exclude it from per-route parity.
+        if (expanded.startsWith("/data/seo/v1")) {
+          continue;
+        }
+        const normalized = normalizeTemplateBoundaries(expanded);
+        routes.add(`${method} ${normalized}`);
       }
     }
 
@@ -107,11 +187,15 @@ function verifyProductCoverage(product, clientRoutes, manifestRoutes) {
 }
 
 assert.ok(fs.existsSync(routesFile), "generated/public-routes.json is missing.");
-assert.ok(fs.existsSync(cloudClientFile), "packages/cloud-sdk/src/client.ts is missing.");
+assert.ok(
+  fs.existsSync(dataClientFile),
+  "packages/data-sdk/src/client.ts is missing.",
+);
 
 const routesManifest = readJson(routesFile);
-const cloudRoutes = extractClientRoutes(cloudClientFile);
+const clientRoutes = extractClientRoutes(dataClientFile);
 
-verifyProductCoverage("Cloud", cloudRoutes, routesManifest.cloud);
+const allManifestRoutes = [...routesManifest.static, ...routesManifest.fx];
+verifyProductCoverage("Data", clientRoutes, allManifestRoutes);
 
 console.log("Client route coverage verification passed.");

@@ -22,8 +22,8 @@ function verifyRootReadme() {
   const source = readFile("README.md");
 
   const required = [
-    "# Voyant Cloud SDK",
-    "`@voyantjs/cloud-sdk`",
+    "# Voyant Data SDK",
+    "`@voyantjs/data-sdk`",
     "`@voyant-sdk/sdk-core`",
     "pnpm verify",
     "pnpm release",
@@ -33,7 +33,7 @@ function verifyRootReadme() {
     "pnpm verify:package-artifacts",
     "pnpm verify:package-manifests",
     "pnpm verify:readmes",
-    "[Cloud SDK](./docs/cloud.md)",
+    "[Data SDK](./docs/data.md)",
   ];
 
   for (const needle of required) {
@@ -116,7 +116,7 @@ function verifyContractsDoc() {
     "pnpm sync:contracts",
     "generated/public-routes.json",
     "`voyant-cloud`",
-    "`cloud-sdk`",
+    "`data-sdk`",
   ];
 
   for (const needle of required) {
@@ -139,7 +139,7 @@ function extractTypeScriptSnippets(relativePath) {
 }
 
 function normalizeSnippet(source) {
-  return source.replaceAll("process.env.VOYANT_API_KEY!", '"cloud_key"');
+  return source.replaceAll("process.env.VOYANT_API_KEY!", '"data_key"');
 }
 
 function verifyMarkdownExamplesTypecheck() {
@@ -152,8 +152,8 @@ function verifyMarkdownExamplesTypecheck() {
     mkdirSync(nodeModulesDir, { recursive: true });
     mkdirSync(voyantJsDir, { recursive: true });
     symlinkSync(
-      path.join(repoRoot, "packages", "cloud-sdk"),
-      path.join(voyantJsDir, "cloud-sdk"),
+      path.join(repoRoot, "packages", "data-sdk"),
+      path.join(voyantJsDir, "data-sdk"),
     );
     writeFileSync(
       path.join(tempDir, "package.json"),
@@ -186,8 +186,8 @@ function verifyMarkdownExamplesTypecheck() {
     );
 
     const snippetSources = [
-      "packages/cloud-sdk/README.md",
-      "docs/cloud.md",
+      "packages/data-sdk/README.md",
+      "docs/data.md",
     ].flatMap((relativePath) =>
       extractTypeScriptSnippets(relativePath).map((snippet, index) => ({
         filename: `snippet-${path
@@ -217,10 +217,10 @@ function verifyMarkdownExamplesTypecheck() {
 
 verifyRootReadme();
 verifyPackageReadme({
-  path: "packages/cloud-sdk/README.md",
-  packageName: "@voyantjs/cloud-sdk",
-  factoryName: "createVoyantCloudClient",
-  docLink: "[../../docs/cloud.md](../../docs/cloud.md)",
+  path: "packages/data-sdk/README.md",
+  packageName: "@voyantjs/data-sdk",
+  factoryName: "createVoyantDataClient",
+  docLink: "[../../docs/data.md](../../docs/data.md)",
   envVar: "VOYANT_API_KEY",
 });
 verifyPublishingDoc();

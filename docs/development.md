@@ -18,19 +18,20 @@ pnpm verify:readmes
 pnpm verify
 ```
 
-`verify:api-parity` compares the local SDK route inventory against the sibling
-`voyant-cloud` route files. It skips cleanly when that repo is not available.
+`verify:api-parity` compares the local SDK route inventory against the
+sibling `voyant-cloud` route files. It skips cleanly when that repo is not
+available.
 
 Run a single package if needed:
 
 ```sh
-pnpm --filter @voyantjs/cloud-sdk check-types
-pnpm --filter @voyantjs/cloud-sdk lint
+pnpm --filter @voyantjs/data-sdk check-types
+pnpm --filter @voyantjs/data-sdk lint
 ```
 
 ## Workspace structure
 
-- `packages/cloud-sdk`: Voyant Cloud SDK
+- `packages/data-sdk`: Voyant Data SDK
 - `packages/sdk-core`: shared transport and error handling
 - `packages/eslint-config`: shared ESLint config
 - `packages/typescript-config`: shared TypeScript config
@@ -44,5 +45,5 @@ pnpm --filter @voyantjs/cloud-sdk lint
 
 ## Docs
 
-This repo intentionally uses plain Markdown docs for now. The unified docs app
-will live in `voyant`.
+This repo intentionally uses plain Markdown docs for now. The unified docs
+app will live in `voyant`.

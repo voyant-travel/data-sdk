@@ -1,16 +1,36 @@
 {
-  "cloud": [
-    "GET /email/v1/messages",
-    "GET /email/v1/messages/:id",
-    "GET /sms/v1/messages",
-    "GET /sms/v1/phone-numbers",
-    "GET /vault/v1",
-    "GET /vault/v1/:vaultSlug/secrets",
-    "GET /vault/v1/:vaultSlug/secrets/:key",
-    "GET /verify/v1/attempts",
-    "POST /email/v1/messages",
-    "POST /sms/v1/messages",
-    "POST /verify/v1/check",
-    "POST /verify/v1/start"
+  "static": [
+    "GET /data/static/v1/aircraft",
+    "GET /data/static/v1/aircraft/:iata",
+    "GET /data/static/v1/airlines/:iata",
+    "GET /data/static/v1/airlines/search",
+    "GET /data/static/v1/airports/:iata",
+    "GET /data/static/v1/airports/nearby",
+    "GET /data/static/v1/airports/search",
+    "GET /data/static/v1/cities/:id",
+    "GET /data/static/v1/cities/nearby",
+    "GET /data/static/v1/cities/search",
+    "GET /data/static/v1/countries",
+    "GET /data/static/v1/countries-light",
+    "GET /data/static/v1/countries/:iso2",
+    "GET /data/static/v1/currencies",
+    "GET /data/static/v1/currencies/:code",
+    "GET /data/static/v1/geographic-regions",
+    "GET /data/static/v1/geographic-regions/:code",
+    "GET /data/static/v1/languages",
+    "GET /data/static/v1/languages/:code",
+    "GET /data/static/v1/regions",
+    "GET /data/static/v1/regions/:code",
+    "GET /data/static/v1/timezones"
+  ],
+  "fx": [
+    "GET /data/fx/v1/fx/codes",
+    "GET /data/fx/v1/fx/enriched/:base/:target",
+    "GET /data/fx/v1/fx/history/:currency/:year/:month/:day",
+    "GET /data/fx/v1/fx/history/:currency/:year/:month/:day/:amount",
+    "GET /data/fx/v1/fx/latest/:base",
+    "GET /data/fx/v1/fx/pair/:base/:target",
+    "GET /data/fx/v1/fx/pair/:base/:target/:amount",
+    "GET /data/fx/v1/fx/quota"
   ]
 }

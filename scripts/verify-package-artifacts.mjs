@@ -11,8 +11,8 @@ const packDir = mkdtempSync(path.join(tmpdir(), "voyant-sdk-pack-"));
 
 const packages = [
   {
-    dir: path.join(repoRoot, "packages", "cloud-sdk"),
-    expectedName: "@voyantjs/cloud-sdk",
+    dir: path.join(repoRoot, "packages", "data-sdk"),
+    expectedName: "@voyantjs/data-sdk",
   },
 ];
 
@@ -83,22 +83,41 @@ function verifyInstalledImports(tarballs) {
         "-e",
         `
           import assert from "node:assert/strict";
-          import { createVoyantCloudClient } from "@voyantjs/cloud-sdk";
+          import { createVoyantDataClient } from "@voyantjs/data-sdk";
 
-          const cloud = createVoyantCloudClient({ apiKey: "cloud_key" });
+          const data = createVoyantDataClient({ apiKey: "data_key" });
 
-          assert.equal(typeof cloud.vault.listVaults, "function");
-          assert.equal(typeof cloud.vault.listSecrets, "function");
-          assert.equal(typeof cloud.vault.getSecret, "function");
-          assert.equal(typeof cloud.sms.listPhoneNumbers, "function");
-          assert.equal(typeof cloud.sms.listMessages, "function");
-          assert.equal(typeof cloud.sms.sendMessage, "function");
-          assert.equal(typeof cloud.verification.start, "function");
-          assert.equal(typeof cloud.verification.check, "function");
-          assert.equal(typeof cloud.verification.listAttempts, "function");
-          assert.equal(typeof cloud.email.listMessages, "function");
-          assert.equal(typeof cloud.email.sendMessage, "function");
-          assert.equal(typeof cloud.email.getMessage, "function");
+          assert.equal(typeof data.countries.list, "function");
+          assert.equal(typeof data.countries.get, "function");
+          assert.equal(typeof data.countries.listLight, "function");
+          assert.equal(typeof data.regions.list, "function");
+          assert.equal(typeof data.regions.get, "function");
+          assert.equal(typeof data.cities.search, "function");
+          assert.equal(typeof data.cities.nearby, "function");
+          assert.equal(typeof data.cities.get, "function");
+          assert.equal(typeof data.airports.search, "function");
+          assert.equal(typeof data.airports.nearby, "function");
+          assert.equal(typeof data.airports.get, "function");
+          assert.equal(typeof data.airlines.search, "function");
+          assert.equal(typeof data.airlines.get, "function");
+          assert.equal(typeof data.aircraft.list, "function");
+          assert.equal(typeof data.aircraft.get, "function");
+          assert.equal(typeof data.languages.list, "function");
+          assert.equal(typeof data.languages.get, "function");
+          assert.equal(typeof data.currencies.list, "function");
+          assert.equal(typeof data.currencies.get, "function");
+          assert.equal(typeof data.timezones.list, "function");
+          assert.equal(typeof data.geographicRegions.list, "function");
+          assert.equal(typeof data.geographicRegions.get, "function");
+          assert.equal(typeof data.fx.latest, "function");
+          assert.equal(typeof data.fx.pair, "function");
+          assert.equal(typeof data.fx.enriched, "function");
+          assert.equal(typeof data.fx.history, "function");
+          assert.equal(typeof data.fx.codes, "function");
+          assert.equal(typeof data.fx.quota, "function");
+          assert.equal(typeof data.seo.request, "function");
+          assert.equal(typeof data.seo.get, "function");
+          assert.equal(typeof data.seo.post, "function");
         `,
       ],
       {
@@ -155,103 +174,99 @@ function verifyInstalledTypecheck(tarballs) {
       path.join(appDir, "index.ts"),
       `
         import {
-          createVoyantCloudClient,
-          VoyantCloudClient,
-          type CheckVerificationInput,
-          type EmailMessageStatus,
-          type EmailMessageSummary,
-          type PhoneNumberCapabilities,
-          type PhoneNumberStatus,
-          type PhoneNumberSummary,
-          type SendEmailInput,
-          type SendSmsInput,
-          type SmsMessageStatus,
-          type SmsMessageSummary,
-          type StartVerificationInput,
-          type VaultSecretSummary,
-          type VaultSecretValue,
-          type VaultSummary,
-          type VerificationAttemptStatus,
-          type VerificationAttemptSummary,
-          type VerificationChannel,
-          type VerificationCheckResult,
-          type VoyantCloudClientOptions,
-        } from "@voyantjs/cloud-sdk";
+          createVoyantDataClient,
+          VoyantDataClient,
+          type Aircraft,
+          type AircraftCategory,
+          type Airline,
+          type Airport,
+          type AirportType,
+          type City,
+          type Country,
+          type Currency,
+          type FxResponse,
+          type GeographicRegion,
+          type Language,
+          type LightCountry,
+          type ListResponse,
+          type NearbyAirport,
+          type NearbyCity,
+          type Region,
+          type SeoTaskResponse,
+          type SingleResponse,
+          type Timezone,
+          type VoyantDataClientOptions,
+        } from "@voyantjs/data-sdk";
 
-        const cloud: VoyantCloudClient = createVoyantCloudClient({
-          apiKey: "cloud_key",
-        } satisfies VoyantCloudClientOptions);
+        const client: VoyantDataClient = createVoyantDataClient({
+          apiKey: "data_key",
+        } satisfies VoyantDataClientOptions);
 
-        const vaultsPromise: Promise<VaultSummary[]> = cloud.vault.listVaults();
-        const secretsPromise: Promise<VaultSecretSummary[]> =
-          cloud.vault.listSecrets("primary");
-        const secretPromise: Promise<VaultSecretValue> = cloud.vault.getSecret(
-          "primary",
-          "stripe-key",
+        const countriesPromise: Promise<ListResponse<Country>> =
+          client.countries.list({ region: "Europe" });
+        const countryPromise: Promise<SingleResponse<Country>> =
+          client.countries.get("RO");
+        const lightCountriesPromise: Promise<ListResponse<LightCountry>> =
+          client.countries.listLight();
+        const regionPromise: Promise<SingleResponse<Region>> =
+          client.regions.get("US-CA");
+        const cityPromise: Promise<SingleResponse<City>> =
+          client.cities.get("2643743");
+        const nearbyCitiesPromise: Promise<ListResponse<NearbyCity>> =
+          client.cities.nearby({ latitude: 51.5, longitude: -0.1, radiusKm: 25 });
+        const airportPromise: Promise<SingleResponse<Airport>> =
+          client.airports.get("LHR");
+        const nearbyAirportsPromise: Promise<ListResponse<NearbyAirport>> =
+          client.airports.nearby({ latitude: 51.5, longitude: -0.1, radiusKm: 50 });
+        const airlinePromise: Promise<SingleResponse<Airline>> =
+          client.airlines.get("BA");
+        const aircraftPromise: Promise<SingleResponse<Aircraft>> =
+          client.aircraft.get("359");
+        const languagesPromise: Promise<ListResponse<Language>> =
+          client.languages.list();
+        const currenciesPromise: Promise<ListResponse<Currency>> =
+          client.currencies.list();
+        const timezonesPromise: Promise<ListResponse<Timezone>> =
+          client.timezones.list();
+        const geoRegionsPromise: Promise<ListResponse<GeographicRegion>> =
+          client.geographicRegions.list();
+
+        const fxLatestPromise: Promise<FxResponse> = client.fx.latest("EUR");
+        const fxPairPromise: Promise<FxResponse> = client.fx.pair("EUR", "USD", 100);
+        const fxHistoryPromise: Promise<FxResponse> = client.fx.history({
+          base: "EUR",
+          year: 2024,
+          month: 1,
+          day: 15,
+        });
+
+        const seoPromise: Promise<SeoTaskResponse> = client.seo.get(
+          "/serp/google/locations",
         );
-        const phoneNumbersPromise: Promise<PhoneNumberSummary[]> =
-          cloud.sms.listPhoneNumbers();
-        const messagesPromise: Promise<SmsMessageSummary[]> =
-          cloud.sms.listMessages();
 
-        const sendInput: SendSmsInput = {
-          to: "+14155551234",
-          body: "Hello from Voyant Cloud",
-        };
-        const sendPromise: Promise<SmsMessageSummary> =
-          cloud.sms.sendMessage(sendInput);
+        const airportType: AirportType = "large_airport";
+        const aircraftCategory: AircraftCategory = "wide_body";
 
-        const startInput: StartVerificationInput = {
-          to: "+14155551234",
-          channel: "sms" satisfies VerificationChannel,
-        };
-        const startPromise: Promise<VerificationAttemptSummary> =
-          cloud.verification.start(startInput);
-        const checkInput: CheckVerificationInput = {
-          to: "+14155551234",
-          code: "123456",
-        };
-        const checkPromise: Promise<VerificationCheckResult> =
-          cloud.verification.check(checkInput);
-        const attemptsPromise: Promise<VerificationAttemptSummary[]> =
-          cloud.verification.listAttempts();
-
-        const emailListPromise: Promise<EmailMessageSummary[]> =
-          cloud.email.listMessages();
-        const emailSendInput: SendEmailInput = {
-          from: "noreply@example.com",
-          to: ["alice@example.com"],
-          subject: "Welcome",
-          text: "Hi",
-        };
-        const emailSendPromise: Promise<EmailMessageSummary> =
-          cloud.email.sendMessage(emailSendInput);
-        const emailGetPromise: Promise<EmailMessageSummary> =
-          cloud.email.getMessage("email_123");
-
-        const phoneStatus: PhoneNumberStatus = "active";
-        const messageStatus: SmsMessageStatus = "queued";
-        const attemptStatus: VerificationAttemptStatus = "pending";
-        const emailStatus: EmailMessageStatus = "delivered";
-        const capabilities: PhoneNumberCapabilities = { sms: true };
-
-        void vaultsPromise;
-        void secretsPromise;
-        void secretPromise;
-        void phoneNumbersPromise;
-        void messagesPromise;
-        void sendPromise;
-        void startPromise;
-        void checkPromise;
-        void attemptsPromise;
-        void emailListPromise;
-        void emailSendPromise;
-        void emailGetPromise;
-        void phoneStatus;
-        void messageStatus;
-        void attemptStatus;
-        void emailStatus;
-        void capabilities;
+        void countriesPromise;
+        void countryPromise;
+        void lightCountriesPromise;
+        void regionPromise;
+        void cityPromise;
+        void nearbyCitiesPromise;
+        void airportPromise;
+        void nearbyAirportsPromise;
+        void airlinePromise;
+        void aircraftPromise;
+        void languagesPromise;
+        void currenciesPromise;
+        void timezonesPromise;
+        void geoRegionsPromise;
+        void fxLatestPromise;
+        void fxPairPromise;
+        void fxHistoryPromise;
+        void seoPromise;
+        void airportType;
+        void aircraftCategory;
       `,
     );
 
