@@ -3,104 +3,172 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
+/**
+ * Re-runs the route extraction performed by `sync-route-manifests.mjs` and
+ * compares the result against the checked-in manifest. Fails if the two have
+ * drifted — i.e. the upstream voyant-cloud routes have changed and
+ * `pnpm sync:contracts` was not re-run.
+ */
+
 const repoRoot = path.resolve(import.meta.dirname, "..");
 const voyantCloudRepo = path.resolve(repoRoot, "../voyant-cloud");
 const manifestFile = path.join(repoRoot, "generated", "public-routes.json");
 
-const STATIC_ROUTE_FILES = [
-  "apps/data-static-api/src/routes/aircraft.ts",
-  "apps/data-static-api/src/routes/airlines.ts",
-  "apps/data-static-api/src/routes/airports.ts",
-  "apps/data-static-api/src/routes/cities.ts",
-  "apps/data-static-api/src/routes/countries.ts",
-  "apps/data-static-api/src/routes/reference.ts",
-  "apps/data-static-api/src/routes/regions.ts",
+const products = [
+  {
+    key: "static",
+    routesDir: "apps/data-static-api/src/routes",
+    workerPrefix: "",
+    publicPrefix: "/data/static",
+  },
+  {
+    key: "fx",
+    routesDir: "apps/data-fx-api/src/routes",
+    workerPrefix: "",
+    publicPrefix: "/data/fx",
+  },
+  {
+    key: "seo",
+    routesDir: "apps/data-seo-api/src/routes",
+    workerPrefix: "/seo",
+    publicPrefix: "/data/seo",
+  },
+  {
+    key: "reviews",
+    routesDir: "apps/data-reviews-api/src/routes",
+    workerPrefix: "/reviews",
+    publicPrefix: "/data/reviews",
+  },
+  {
+    key: "hotels",
+    routesDir: "apps/data-hotels-api/src/routes",
+    workerPrefix: "/hotels",
+    publicPrefix: "/data/hotels",
+  },
+  {
+    key: "restaurants",
+    routesDir: "apps/data-restaurants-api/src/routes",
+    workerPrefix: "/restaurants",
+    publicPrefix: "/data/restaurants",
+  },
+  {
+    key: "experiences",
+    routesDir: "apps/data-experiences-api/src/routes",
+    workerPrefix: "/experiences",
+    publicPrefix: "/data/experiences",
+  },
 ];
 
-const FX_MANIFEST_FILE = "apps/data-fx-api/src/routes/fx-manifest.ts";
-
-function fileExists(filePath) {
-  return fs.existsSync(filePath);
+function fileExists(p) {
+  return fs.existsSync(p);
 }
 
-function joinPath(prefix, suffix) {
-  if (!prefix) return suffix;
-  if (suffix === "/" || suffix === "") return prefix;
-  return `${prefix}${suffix.startsWith("/") ? "" : "/"}${suffix}`;
+function* walkRouteFiles(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith(".")) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) yield* walkRouteFiles(full);
+    else if (entry.isFile() && entry.name.endsWith(".ts")) yield full;
+  }
 }
 
-/**
- * Same extraction shape as `sync-route-manifests.mjs` so the two scripts
- * agree on what counts as a public route.
- */
-function extractAppRoutes(filePath, publicPrefix) {
+function extractLiteralAppRoutes(filePath) {
   const source = fs.readFileSync(filePath, "utf8");
   return [
-    ...source.matchAll(/\bapp\.(get|post|patch|delete|put)\(\s*"([^"]+)"/gs),
-  ]
-    .filter(([, , route]) => !route.includes("/v1/internal"))
-    .map(
-      ([, method, route]) =>
-        `${method.toUpperCase()} ${joinPath(publicPrefix, route)}`,
-    );
+    ...source.matchAll(/\bapp\.(get|post|patch|delete|put)\(\s*"([^"]+)"/g),
+  ].map(([, method, route]) => ({ method: method.toUpperCase(), route }));
 }
 
-function extractManifestRoutes(filePath, publicPrefix) {
+function extractFxManifestRoutes(filePath) {
   const source = fs.readFileSync(filePath, "utf8");
-  return [...source.matchAll(/[a-z]+\(\s*"(\/v1\/[^"]+)"/g)].map(
-    ([, route]) => `GET ${joinPath(publicPrefix, route)}`,
-  );
+  return [
+    ...source.matchAll(
+      /\b(?:live|history|metadata|quota)\(\s*"(\/v1\/[^"]+)"/g,
+    ),
+  ].map(([, route]) => ({ method: "GET", route }));
 }
 
-function verifyManifest(label, actualRoutes, expectedRoutes) {
-  const missingRoutes = [...actualRoutes]
-    .filter((route) => !expectedRoutes.has(route))
-    .sort();
-  const staleRoutes = [...expectedRoutes]
-    .filter((route) => !actualRoutes.has(route))
-    .sort();
-
-  assert.equal(
-    missingRoutes.length,
-    0,
-    `${label} SDK is missing public routes from voyant-cloud:\n${missingRoutes.join("\n")}`,
-  );
-
-  assert.equal(
-    staleRoutes.length,
-    0,
-    `${label} SDK parity manifest contains routes no longer present in voyant-cloud:\n${staleRoutes.join("\n")}`,
-  );
+function rewriteToPublic(route, product) {
+  if (route.includes("/internal/")) return null;
+  if (route.endsWith("/health") || route === "/health") return null;
+  if (route.includes("/postbacks/")) return null;
+  if (route.includes("/voyant/tasks")) return null;
+  if (route.includes("/screenshots/")) return null;
+  if (route.endsWith("/countries-light")) return null;
+  if (
+    product.workerPrefix &&
+    (route === product.workerPrefix ||
+      route.startsWith(`${product.workerPrefix}/`))
+  ) {
+    return `${product.publicPrefix}${route.slice(product.workerPrefix.length)}`;
+  }
+  if (route.startsWith("/v1/") || route === "/v1") {
+    return `${product.publicPrefix}${route}`;
+  }
+  return null;
 }
 
-const requiredFiles = [
-  manifestFile,
-  ...STATIC_ROUTE_FILES.map((rel) => path.join(voyantCloudRepo, rel)),
-  path.join(voyantCloudRepo, FX_MANIFEST_FILE),
-];
+function extractPublicRoutes(product) {
+  const routes = new Set();
+  const dir = path.join(voyantCloudRepo, product.routesDir);
+  for (const file of walkRouteFiles(dir)) {
+    const isFxManifest = file.endsWith("fx-manifest.ts");
+    const extracted = isFxManifest
+      ? extractFxManifestRoutes(file)
+      : extractLiteralAppRoutes(file);
+    for (const { method, route } of extracted) {
+      const publicRoute = rewriteToPublic(route, product);
+      if (!publicRoute) continue;
+      routes.add(`${method} ${publicRoute}`);
+    }
+  }
+  return [...routes].sort();
+}
 
-if (!requiredFiles.every(fileExists)) {
+if (!fileExists(manifestFile)) {
   console.log(
-    "Skipping API parity verification: sibling voyant-cloud route files not found.",
+    "Skipping API parity verification: generated/public-routes.json missing.",
+  );
+  process.exit(0);
+}
+
+if (
+  !products.every((p) =>
+    fileExists(path.join(voyantCloudRepo, p.routesDir)),
+  )
+) {
+  console.log(
+    "Skipping API parity verification: sibling voyant-cloud route directories not found.",
   );
   process.exit(0);
 }
 
 const manifest = JSON.parse(fs.readFileSync(manifestFile, "utf8"));
 
-const actualStaticRoutes = new Set(
-  STATIC_ROUTE_FILES.flatMap((rel) =>
-    extractAppRoutes(path.join(voyantCloudRepo, rel), "/data/static"),
-  ),
-);
-const actualFxRoutes = new Set(
-  extractManifestRoutes(
-    path.join(voyantCloudRepo, FX_MANIFEST_FILE),
-    "/data/fx",
-  ),
-);
+for (const product of products) {
+  const expected = extractPublicRoutes(product);
+  const actual = manifest[product.key] ?? [];
 
-verifyManifest("Static", actualStaticRoutes, new Set(manifest.static));
-verifyManifest("FX", actualFxRoutes, new Set(manifest.fx));
+  const missing = expected.filter((r) => !actual.includes(r));
+  const stale = actual.filter((r) => !expected.includes(r));
 
-console.log("API parity verification passed for Static and FX routes.");
+  assert.equal(
+    missing.length,
+    0,
+    `${product.key}: manifest is missing public routes that exist in voyant-cloud:\n${missing.join(
+      "\n",
+    )}`,
+  );
+  assert.equal(
+    stale.length,
+    0,
+    `${product.key}: manifest contains routes no longer present in voyant-cloud:\n${stale.join(
+      "\n",
+    )}`,
+  );
+}
+
+const totalRoutes = Object.values(manifest).flat().length;
+console.log(
+  `API parity verification passed for ${products.length} products (${totalRoutes} routes total).`,
+);
