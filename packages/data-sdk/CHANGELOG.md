@@ -1,5 +1,11 @@
 # @voyantjs/data-sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- f303c3d: Type FX response provenance as `source?: "bnr" | "voyant-data-fx"`.
+
 ## 0.1.1
 
 ### Patch Changes
