@@ -62,6 +62,30 @@ test("VoyantTransport can return the raw response envelope", async () => {
   assert.deepEqual(result, { data: { ok: true }, meta: { page: 1 } });
 });
 
+test("VoyantTransport binds fetch to globalThis before calling it", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchThis;
+
+  globalThis.fetch = async function () {
+    fetchThis = this;
+
+    return new Response(JSON.stringify({ data: { ok: true } }), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    });
+  };
+
+  try {
+    const transport = new VoyantTransport({ apiKey: "test_key" });
+    const result = await transport.request("/v1/example");
+
+    assert.equal(fetchThis, globalThis);
+    assert.deepEqual(result, { ok: true });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("VoyantTransport normalizes response keys to camelCase by default", async () => {
   const transport = new VoyantTransport({
     apiKey: "test_key",

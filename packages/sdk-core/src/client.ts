@@ -122,7 +122,7 @@ export class VoyantTransport {
     this.apiKey = options.apiKey;
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.defaultHeaders = options.headers;
-    this.fetchImpl = options.fetch ?? fetch;
+    this.fetchImpl = (options.fetch ?? fetch).bind(globalThis);
     this.authHeader = options.authHeader ?? "authorization";
     this.authScheme = options.authScheme === undefined ? "Bearer" : options.authScheme;
     this.userAgent = options.userAgent ?? "voyant-sdk";
