@@ -1,5 +1,11 @@
 # @voyantjs/data-sdk
 
+## 0.1.3
+
+### Patch Changes
+
+- 7cdf6a2: Bind the transport fetch implementation to `globalThis` so SDK requests work in strict Web Platform runtimes such as Cloudflare Workers.
+
 ## 0.1.2
 
 ### Patch Changes
