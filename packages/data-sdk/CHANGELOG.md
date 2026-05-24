@@ -1,5 +1,11 @@
 # @voyantjs/data-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- 640cc5f: Normalize parsed API response keys to camelCase by default, including FX responses forwarded from snake_case upstream payloads.
+
 ## 0.1.0
 
 ### Minor Changes
