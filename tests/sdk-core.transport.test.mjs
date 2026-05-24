@@ -62,6 +62,38 @@ test("VoyantTransport can return the raw response envelope", async () => {
   assert.deepEqual(result, { data: { ok: true }, meta: { page: 1 } });
 });
 
+test("VoyantTransport normalizes response keys to camelCase by default", async () => {
+  const transport = new VoyantTransport({
+    apiKey: "test_key",
+    fetch: async () =>
+      new Response(
+        JSON.stringify({
+          data: {
+            base_code: "EUR",
+            conversion_rates: {
+              RON: 4.97,
+            },
+            nested_items: [{ refresh_day_of_month: 1 }],
+          },
+        }),
+        {
+          headers: { "content-type": "application/json" },
+          status: 200,
+        },
+      ),
+  });
+
+  const result = await transport.request("/v1/example");
+
+  assert.deepEqual(result, {
+    baseCode: "EUR",
+    conversionRates: {
+      RON: 4.97,
+    },
+    nestedItems: [{ refreshDayOfMonth: 1 }],
+  });
+});
+
 test("VoyantTransport throws VoyantApiError for non-2xx responses", async () => {
   const transport = new VoyantTransport({
     apiKey: "test_key",

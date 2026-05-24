@@ -59,6 +59,37 @@ function maybeJson(text: string, contentType: string | null) {
   return text;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
+}
+
+function camelCaseKey(key: string) {
+  return key.replace(/_([a-z0-9])/g, (_, char: string) =>
+    char.toUpperCase(),
+  );
+}
+
+function camelCaseKeys(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(camelCaseKeys);
+  }
+
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entryValue]) => [
+      camelCaseKey(key),
+      camelCaseKeys(entryValue),
+    ]),
+  );
+}
+
 function getErrorMessage(body: unknown, fallback: string) {
   if (typeof body === "string" && body.length > 0) {
     return body;
@@ -132,13 +163,18 @@ export class VoyantTransport {
     });
 
     const text = await response.text();
-    const parsed = maybeJson(text, response.headers.get("content-type"));
+    const responseBody = camelCaseKeys(
+      maybeJson(text, response.headers.get("content-type")),
+    );
 
     if (!response.ok) {
       throw new VoyantApiError(
-        getErrorMessage(parsed, `Request failed with status ${response.status}`),
+        getErrorMessage(
+          responseBody,
+          `Request failed with status ${response.status}`,
+        ),
         {
-          body: parsed,
+          body: responseBody,
           requestId: response.headers.get("x-request-id"),
           status: response.status,
         },
@@ -146,13 +182,17 @@ export class VoyantTransport {
     }
 
     if (options.unwrapData === false) {
-      return parsed as T;
+      return responseBody as T;
     }
 
-    if (parsed && typeof parsed === "object" && "data" in parsed) {
-      return parsed.data as T;
+    if (
+      responseBody &&
+      typeof responseBody === "object" &&
+      "data" in responseBody
+    ) {
+      return responseBody.data as T;
     }
 
-    return parsed as T;
+    return responseBody as T;
   }
 }

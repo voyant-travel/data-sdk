@@ -178,6 +178,34 @@ test("fx — composes the eight white-label routes including the double-fx prefi
   }
 });
 
+test("fx — returns camelCase fields when the worker forwards snake_case JSON", async () => {
+  const recorder = createRecorder({
+    responseBody: {
+      result: "success",
+      base_code: "EUR",
+      target_code: "USD",
+      conversion_rate: 1.08,
+      conversion_result: 108,
+      time_last_update_unix: 1710000000,
+    },
+  });
+  const client = createVoyantDataClient({
+    apiKey: "fx_key",
+    fetch: recorder.fetch,
+  });
+
+  const result = await client.fx.pair("EUR", "USD", 100);
+
+  assert.deepEqual(result, {
+    result: "success",
+    baseCode: "EUR",
+    targetCode: "USD",
+    conversionRate: 1.08,
+    conversionResult: 108,
+    timeLastUpdateUnix: 1710000000,
+  });
+});
+
 test("seo — typed SERP namespace composes the locations + organic search routes", async () => {
   const recorder = createRecorder({
     responseBody: { data: [], totalCount: 0 },
