@@ -50,6 +50,12 @@ const danube = await client.geo.rivers.get("river:Q1653");
 // danube.relations.flowsThrough === ["DE", "AT", "SK", "HU", ...]
 const roRivers = await client.geo.countries.rivers("RO");
 const match = await client.geo.resolve("Dunărea"); // → the Danube
+
+// multilingual: set a language once and read `place.name` in it
+const ro = createVoyantDataClient({ apiKey: process.env.VOYANT_API_KEY!, lang: "ro" });
+const de = await ro.geo.countries.get("DE");
+// de.data.name === "Germania", de.data.nameLang === "ro"
+const fr = await ro.geo.countries.get("DE", { lang: "fr" }); // per-call override → "Allemagne"
 ```
 
 ## Shape
@@ -70,8 +76,11 @@ contentAnalysis,domainAnalytics,businessData,dataforseoLabs}`
 resolve}` (the raw routes) plus typed resources
   `client.geo.{countries,regions,cities,ports,rivers}` and a one-shot
   `client.geo.resolve(label)`. `geo.places.get(id)` returns the place with its
-  outgoing relations inline (e.g. a river's `flows_through` countries); the
-  `placeName(place, lang)` helper picks a name from the multilingual `names` map
+  outgoing relations inline (e.g. a river's `flows_through` countries).
+  Multilingual: set `lang` on the client (or pass `lang` per call) and read the
+  server-resolved `place.name`/`place.nameLang`; pass `names: false` to drop the
+  full map. The `placeName(place, lang)` helper re-resolves from a `names` map
+  client-side
 
 The static groups follow a consistent shape: `list` / `search` / `nearby`
 return a `ListResponse<T>` envelope (`{ data, totalCount, nextCursor? }`),

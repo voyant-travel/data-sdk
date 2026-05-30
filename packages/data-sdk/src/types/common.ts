@@ -1,6 +1,14 @@
 import type { QueryValue, VoyantTransportOptions } from "@voyant-sdk/sdk-core";
 
-export type VoyantDataClientOptions = VoyantTransportOptions;
+export interface VoyantDataClientOptions extends VoyantTransportOptions {
+  /**
+   * Default language for geo reads (e.g. `"ro"`, `"fr"`, `"ja"`). When set, the
+   * `geo` namespace requests names in this language and resolves `place.name`
+   * to it (falling back to English, then any available name). Override per call
+   * with a `lang` param. Other products are unaffected.
+   */
+  lang?: string;
+}
 
 /** Standard envelope for collection endpoints. */
 export interface ListResponse<T> {

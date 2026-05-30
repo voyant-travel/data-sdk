@@ -1,4 +1,5 @@
 import { VoyantTransport } from "@voyant-sdk/sdk-core";
+import type { QueryParams } from "@voyant-sdk/sdk-core";
 
 import type {
   Aircraft,
@@ -249,6 +250,7 @@ import type {
   TrustpilotSearchRequest,
   CanonicalPlace,
   CanonicalPlaceType,
+  PlaceLangParams,
   PlaceListParams,
   PlaceRelationKind,
   PlaceResolveRequest,
@@ -283,6 +285,8 @@ interface AsyncListParams extends PaginationParams {
  */
 export class VoyantDataClient {
   readonly transport: VoyantTransport;
+  /** Default language for geo reads; see {@link VoyantDataClientOptions.lang}. */
+  private readonly lang?: string;
 
   readonly static: ReturnType<VoyantDataClient["buildStatic"]>;
   readonly fx: ReturnType<VoyantDataClient["buildFx"]>;
@@ -304,6 +308,7 @@ export class VoyantDataClient {
    */
   constructor(options: VoyantDataClientOptions) {
     this.transport = new VoyantTransport(options);
+    this.lang = options.lang;
     this.static = this.buildStatic();
     this.fx = this.buildFx();
     this.seo = this.buildSeo();
@@ -324,34 +329,47 @@ export class VoyantDataClient {
 
   private buildGeo() {
     const t = this.transport;
+    const lang = this.lang;
+    // Merge the client's default language into a geo query. An explicit per-call
+    // `lang`/`names` wins (it follows the spread). Returns undefined when there
+    // is neither a default nor params, so no empty query string is sent.
+    const withLang = (params?: QueryParams): QueryParams | undefined =>
+      lang === undefined ? params : { lang, ...params };
+
     const places = {
       list: (params?: PlaceListParams) =>
         t.request<ListResponse<CanonicalPlace>>(`${GEO}/places`, {
-          query: params,
+          query: withLang(params),
           unwrapData: false,
         }),
-      search: (params: {
-        q: string;
-        type?: CanonicalPlaceType;
-        limit?: number;
-      }) =>
+      search: (
+        params: {
+          q: string;
+          type?: CanonicalPlaceType;
+          limit?: number;
+        } & PlaceLangParams,
+      ) =>
         t.request<ListResponse<CanonicalPlace>>(`${GEO}/places/search`, {
-          query: params,
+          query: withLang(params),
           unwrapData: false,
         }),
-      get: (id: string) =>
+      get: (id: string, params?: PlaceLangParams) =>
         t.request<PlaceWithRelations>(`${GEO}/places/${enc(id)}`, {
+          query: withLang(params),
           unwrapData: false,
         }),
-      children: (id: string, params?: { type?: CanonicalPlaceType }) =>
+      children: (
+        id: string,
+        params?: { type?: CanonicalPlaceType } & PlaceLangParams,
+      ) =>
         t.request<ListResponse<CanonicalPlace>>(
           `${GEO}/places/${enc(id)}/children`,
-          { query: params, unwrapData: false },
+          { query: withLang(params), unwrapData: false },
         ),
-      ancestors: (id: string) =>
+      ancestors: (id: string, params?: PlaceLangParams) =>
         t.request<{ data: CanonicalPlace[] }>(
           `${GEO}/places/${enc(id)}/ancestors`,
-          { unwrapData: false },
+          { query: withLang(params), unwrapData: false },
         ),
       related: (
         id: string,
@@ -359,16 +377,17 @@ export class VoyantDataClient {
           relation?: PlaceRelationKind;
           type?: CanonicalPlaceType;
           direction?: "incoming" | "outgoing";
-        },
+        } & PlaceLangParams,
       ) =>
         t.request<ListResponse<CanonicalPlace>>(
           `${GEO}/places/${enc(id)}/related`,
-          { query: params, unwrapData: false },
+          { query: withLang(params), unwrapData: false },
         ),
-      resolve: (request: PlaceResolveRequest) =>
+      resolve: (request: PlaceResolveRequest, params?: PlaceLangParams) =>
         t.request<PlaceResolveResult>(`${GEO}/places/resolve`, {
           method: "POST",
           body: request,
+          query: withLang(params),
           unwrapData: false,
         }),
     };
@@ -378,7 +397,7 @@ export class VoyantDataClient {
     const typed = (type: CanonicalPlaceType) => ({
       list: (params?: Omit<PlaceListParams, "type">) =>
         places.list({ ...params, type }),
-      get: (id: string) => places.get(id),
+      get: (id: string, params?: PlaceLangParams) => places.get(id, params),
     });
 
     return {

@@ -65,7 +65,19 @@ export interface CanonicalPlace {
   countryIso2?: string;
   parentId?: string;
   coordinates?: PlaceCoordinates;
-  /** Locale → display name, e.g. `{ en: "Danube", ro: "Dunărea" }`. */
+  /**
+   * Server-resolved display name for the requested language (the client `lang`
+   * or a per-call `lang`), and the locale it was actually served in. Resolution
+   * falls back requested language → English → any available name, so `name` is
+   * always present on read responses. Configure the language once on the client
+   * (`createVoyantDataClient({ lang: "ro" })`) and read `place.name`.
+   */
+  name?: string;
+  nameLang?: string;
+  /**
+   * Locale → display name, e.g. `{ en: "Danube", ro: "Dunărea" }`. The full map;
+   * pass `names: false` to a geo call to omit it when only `name` is needed.
+   */
   names: Record<string, string>;
   aliases?: string[];
   attributes?: Record<string, unknown>;
@@ -131,9 +143,21 @@ export interface PlaceResolveResult {
   results: PlaceResolveMatch[];
 }
 
+/**
+ * Language controls shared by every geo read. `lang` overrides the client-level
+ * language for one call; `names: false` drops the full `names` map from the
+ * response (keeping only the resolved `name`). A `type` alias (not interface) so
+ * it carries an implicit index signature and satisfies the transport's
+ * QueryParams when passed as `query`.
+ */
+export type PlaceLangParams = {
+  lang?: string;
+  names?: boolean;
+};
+
 // A `type` alias (not interface) so it carries an implicit index signature and
 // satisfies the transport's QueryParams when passed as `query`.
-export type PlaceListParams = {
+export type PlaceListParams = PlaceLangParams & {
   type?: CanonicalPlaceType;
   country?: string;
   parent?: string;
@@ -143,8 +167,10 @@ export type PlaceListParams = {
 };
 
 /**
- * Pick a place name in a preferred language, falling back through `en` and then
- * any available name. Use it to render multilingual `names` for a locale.
+ * Pick a place name in a preferred language from the `names` map, falling back
+ * through `en` and then any available name. Prefer the server-resolved
+ * `place.name` (set `lang` on the client or per call); reach for this helper to
+ * re-resolve a different language client-side from a `names` map you already hold.
  */
 export function placeName(
   place: Pick<CanonicalPlace, "names">,
