@@ -51,11 +51,9 @@ Root client:
 
 ## Selected public types
 
-- `Country`, `Region`, `City`, `Airport`, `Airline`, `Aircraft`,
-  `LightCountry`
-- `Language`, `Currency`, `Timezone`, `GeographicRegion`
-- `AirportType`, `AircraftCategory`
-- `NearbyAirport`, `NearbyCity`
+- `Airport`, `AirportType`, `Airline`, `Aircraft`, `AircraftCategory`
+- `CanonicalPlace`, `CanonicalPlaceType`, `PlaceWithRelations`
+- `LanguageEntry`, `CurrencyEntry`, `TimezoneEntry`
 - `ListResponse<T>`, `SingleResponse<T>`
 - `FxResponse`, `FxHistoryParams`
 - `SeoTaskResponse`, `SeoRequestOptions`

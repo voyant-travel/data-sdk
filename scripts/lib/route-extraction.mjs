@@ -6,7 +6,7 @@
  * the extractor and asserts no drift). Keeping the logic in one place avoids
  * the two scripts disagreeing about what counts as a public route.
  *
- * The public surface is composed of seven Cloudflare Workers, each exposing
+ * The public surface is composed of eight Cloudflare Workers, each exposing
  * its routes through a mix of three patterns:
  *
  *   1. Literal `app.<method>("/path", ...)` calls. Easy: regex.
@@ -38,10 +38,10 @@ import path from "node:path";
  */
 export const products = [
   {
-    key: "static",
-    routesDir: "apps/data-static-api/src/routes",
+    key: "air",
+    routesDir: "apps/data-air-api/src/routes",
     workerPrefix: "",
-    publicPrefix: "/data/static",
+    publicPrefix: "/data/air",
   },
   {
     key: "fx",
@@ -121,7 +121,10 @@ function extractIdentifierAppRoutes(source, consts) {
     const literal = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     // app.post(BASE_PATH, ...)
     for (const match of source.matchAll(
-      new RegExp(`\\bapp\\.(get|post|patch|delete|put)\\(\\s*${literal}\\b`, "g"),
+      new RegExp(
+        `\\bapp\\.(get|post|patch|delete|put)\\(\\s*${literal}\\b`,
+        "g",
+      ),
     )) {
       routes.push({ method: match[1].toUpperCase(), route: value });
     }
@@ -177,12 +180,18 @@ function extractTripadvisorReferenceRoutes(source) {
     /\bregisterTripadvisorReferenceRoutes\(\s*app\s*,\s*"([^"]+)"/g,
   )) {
     const basePath = match[1];
-    routes.push({ method: "GET", route: `${basePath}/tripadvisor/reference/locations` });
+    routes.push({
+      method: "GET",
+      route: `${basePath}/tripadvisor/reference/locations`,
+    });
     routes.push({
       method: "GET",
       route: `${basePath}/tripadvisor/reference/locations/:countryCode`,
     });
-    routes.push({ method: "GET", route: `${basePath}/tripadvisor/reference/languages` });
+    routes.push({
+      method: "GET",
+      route: `${basePath}/tripadvisor/reference/languages`,
+    });
   }
   return routes;
 }
@@ -194,7 +203,9 @@ function extractTripadvisorReferenceRoutes(source) {
 function extractFxManifestRoutes(filePath) {
   const source = fs.readFileSync(filePath, "utf8");
   return [
-    ...source.matchAll(/\b(?:live|history|metadata|quota)\(\s*"(\/v1\/[^"]+)"/g),
+    ...source.matchAll(
+      /\b(?:live|history|metadata|quota)\(\s*"(\/v1\/[^"]+)"/g,
+    ),
   ].map(([, route]) => ({ method: "GET", route }));
 }
 
@@ -225,7 +236,10 @@ function extractInFileHelperRoutes(source) {
   )) {
     const [, helperName, pathParam] = fnMatch;
     // Find the helper body: from match end to matching close-brace.
-    const bodyStart = source.indexOf("{", fnMatch.index + fnMatch[0].length - 1);
+    const bodyStart = source.indexOf(
+      "{",
+      fnMatch.index + fnMatch[0].length - 1,
+    );
     if (bodyStart < 0) continue;
     let depth = 0;
     let bodyEnd = -1;
@@ -245,7 +259,10 @@ function extractInFileHelperRoutes(source) {
     const patterns = [];
     // app.method(pathParam, ...)
     for (const m of body.matchAll(
-      new RegExp(`\\bapp\\.(get|post|patch|delete|put)\\(\\s*${pathParam}\\b`, "g"),
+      new RegExp(
+        `\\bapp\\.(get|post|patch|delete|put)\\(\\s*${pathParam}\\b`,
+        "g",
+      ),
     )) {
       patterns.push({ method: m[1].toUpperCase(), suffix: "" });
     }
@@ -328,10 +345,7 @@ function extractFromFile(filePath) {
     return extractSerpSearchesRoutes();
   }
   if (filePath.endsWith("serp-actions.ts")) {
-    return [
-      ...extractLiteralAppRoutes(source),
-      ...extractSerpActionsRoutes(),
-    ];
+    return [...extractLiteralAppRoutes(source), ...extractSerpActionsRoutes()];
   }
   const consts = extractBasePathConstants(source);
   return [

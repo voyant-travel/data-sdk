@@ -7,9 +7,7 @@ Public TypeScript client for the Voyant Data APIs.
 `@voyantjs/data-sdk` is the unified client for the eight sub-products that
 make up the Voyant Data product, all served behind a single hostname:
 
-- `client.static` — owned reference data (countries, regions, cities,
-  airports, airlines, aircraft, languages, currencies, timezones, geographic
-  regions)
+- `client.air` — aviation reference data (airports, airlines, aircraft)
 - `client.fx` — currency exchange (exchangerate-api.com white-label)
 - `client.seo` — DataForSEO white-label, namespaced by sub-product
   (`serp`, `keywordsData`, `aiOptimization`, `backlinks`, `domainAnalytics`,
@@ -41,8 +39,8 @@ const client = createVoyantDataClient({
   apiKey: process.env.VOYANT_API_KEY!,
 });
 
-const countries = await client.static.countries.list({ region: "Europe" });
-const lhr = await client.static.airports.get("LHR");
+const countries = await client.geo.countries.list();
+const lhr = await client.air.airports.get("LHR");
 const eurUsd = await client.fx.pair("EUR", "USD", 100);
 
 // geo: typed resources over one polymorphic gazetteer
@@ -52,7 +50,10 @@ const roRivers = await client.geo.countries.rivers("RO");
 const match = await client.geo.resolve("Dunărea"); // → the Danube
 
 // multilingual: set a language once and read `place.name` in it
-const ro = createVoyantDataClient({ apiKey: process.env.VOYANT_API_KEY!, lang: "ro" });
+const ro = createVoyantDataClient({
+  apiKey: process.env.VOYANT_API_KEY!,
+  lang: "ro",
+});
 const de = await ro.geo.countries.get("DE");
 // de.data.name === "Germania", de.data.nameLang === "ro"
 const fr = await ro.geo.countries.get("DE", { lang: "fr" }); // per-call override → "Allemagne"
@@ -62,8 +63,7 @@ const fr = await ro.geo.countries.get("DE", { lang: "fr" }); // per-call overrid
 
 Every sub-product is a top-level namespace on the client:
 
-- static reference: `client.static.{countries,regions,cities,airports,
-airlines,aircraft,languages,currencies,timezones,geographicRegions}`
+- aviation: `client.air.{airports,airlines,aircraft}`
 - currency exchange: `client.fx.{latest,pair,enriched,history,codes,quota}`
 - SERP, keywords, AI optimization, backlinks, on-page, content analysis,
   domain analytics, business data, dataforseo-labs:
@@ -74,7 +74,8 @@ contentAnalysis,domainAnalytics,businessData,dataforseoLabs}`
   `get`/(some) `run` per resource
 - geography: `client.geo.places.{list,search,get,children,ancestors,related,
 resolve}` (the raw routes) plus typed resources
-  `client.geo.{countries,regions,subdivisions,cities,ports,rivers}` and a one-shot
+  `client.geo.{countries,regions,subdivisions,cities,ports,rivers}`, reference
+  catalogs `client.geo.reference.{languages,currencies,timezones}`, and a one-shot
   `client.geo.resolve(label)`. `geo.places.get(id)` returns the place with its
   outgoing relations inline (e.g. a river's `flows_through` countries).
   Multilingual: set `lang` on the client (or pass `lang` per call) and read the
@@ -92,8 +93,7 @@ verticals follow the same envelopes: `create` and `get` return
 
 Useful exported types include:
 
-- static: `Country`, `Region`, `City`, `Airport`, `Airline`, `Aircraft`,
-  `LanguageEntry`, `CurrencyEntry`, `TimezoneEntry`, `GeographicRegion`
+- air: `Airport`, `AirportType`, `Airline`, `Aircraft`, `AircraftCategory`
 - envelopes: `ListResponse<T>`, `SingleResponse<T>`,
   `PaginationParams`, `CountryFilteredPaginationParams`
 - fx: `FxLatestResponse`, `FxPairResponse`, `FxEnrichedResponse`,
@@ -106,15 +106,15 @@ Useful exported types include:
   `TripadvisorReferenceLocation`
 - geo: `CanonicalPlace`, `CanonicalPlaceType`, `PlaceWithRelations`,
   `PlaceRelation`, `PlaceResolveRequest`, `PlaceResolveResult`,
-  `CountryAttributes`, `CityAttributes`, `WaterwayAttributes` (+ `placeName`
-  helper)
+  `CountryAttributes`, `CityAttributes`, `WaterwayAttributes`, `LanguageEntry`,
+  `CurrencyEntry`, `TimezoneEntry` (+ `placeName` helper)
 - options: `VoyantDataClientOptions`
 
 ## Notes
 
 - default base URL is `https://api.voyantjs.com`
 - request auth defaults to `authorization: Bearer <apiKey>`
-- API tokens are scoped per sub-product (`data:static:read`,
+- API tokens are scoped per sub-product (`data:air:read`,
   `data:fx:read`, `data:seo:read`, `data:reviews:read`,
   `data:hotels:read`, `data:restaurants:read`, `data:experiences:read`,
   `data:geo:read`)

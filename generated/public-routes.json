@@ -1,26 +1,12 @@
 {
-  "static": [
-    "GET /data/static/v1/aircraft",
-    "GET /data/static/v1/aircraft/:iata",
-    "GET /data/static/v1/airlines/:iata",
-    "GET /data/static/v1/airlines/search",
-    "GET /data/static/v1/airports/:iata",
-    "GET /data/static/v1/airports/nearby",
-    "GET /data/static/v1/airports/search",
-    "GET /data/static/v1/cities/:id",
-    "GET /data/static/v1/cities/nearby",
-    "GET /data/static/v1/cities/search",
-    "GET /data/static/v1/countries",
-    "GET /data/static/v1/countries/:iso2",
-    "GET /data/static/v1/currencies",
-    "GET /data/static/v1/currencies/:code",
-    "GET /data/static/v1/geographic-regions",
-    "GET /data/static/v1/geographic-regions/:code",
-    "GET /data/static/v1/languages",
-    "GET /data/static/v1/languages/:code",
-    "GET /data/static/v1/regions",
-    "GET /data/static/v1/regions/:code",
-    "GET /data/static/v1/timezones"
+  "air": [
+    "GET /data/air/v1/aircraft",
+    "GET /data/air/v1/aircraft/:iata",
+    "GET /data/air/v1/airlines/:iata",
+    "GET /data/air/v1/airlines/search",
+    "GET /data/air/v1/airports/:iata",
+    "GET /data/air/v1/airports/nearby",
+    "GET /data/air/v1/airports/search"
   ],
   "fx": [
     "GET /data/fx/v1/fx/codes",
@@ -280,6 +266,11 @@
     "GET /data/geo/v1/places/:id/children",
     "GET /data/geo/v1/places/:id/related",
     "GET /data/geo/v1/places/search",
+    "GET /data/geo/v1/reference/currencies",
+    "GET /data/geo/v1/reference/currencies/:code",
+    "GET /data/geo/v1/reference/languages",
+    "GET /data/geo/v1/reference/languages/:code",
+    "GET /data/geo/v1/reference/timezones",
     "POST /data/geo/v1/places/resolve"
   ]
 }

@@ -1,5 +1,5 @@
 export * from "./common.js";
-export * from "./static.js";
+export * from "./air.js";
 export * from "./fx.js";
 export * from "./seo.js";
 export * from "./geo.js";

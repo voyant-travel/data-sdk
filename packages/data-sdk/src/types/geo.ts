@@ -168,6 +168,34 @@ export type PlaceListParams = PlaceLangParams & {
   offset?: number;
 };
 
+// ─── Reference catalogs (not places) ───
+// Languages, currencies, and timezones pair with the gazetteer but are not
+// places. Served under `/data/geo/v1/reference/*` (bundled static data).
+
+export interface LanguageEntry {
+  code: string;
+  name: string;
+}
+
+export interface CurrencyEntry {
+  code: string;
+  name: string;
+  namePlural: string;
+  symbol: string;
+  symbolNative: string;
+  decimalDigits: number;
+  rounding: number;
+}
+
+export interface TimezoneEntry {
+  value: string;
+  abbr: string;
+  offset: number;
+  isdst: boolean;
+  text: string;
+  utc: string[];
+}
+
 /**
  * Pick a place name in a preferred language from the `names` map, falling back
  * through `en` and then any available name. Prefer the server-resolved

@@ -55,7 +55,6 @@ import type {
   CategoriesForDomainResult,
   CategoriesForKeywordsRequest,
   CategoriesForKeywordsResult,
-  City,
   ClickstreamBulkSearchVolumeRequest,
   ClickstreamBulkVolumeResult,
   ClickstreamGlobalSearchVolumeRequest,
@@ -83,7 +82,6 @@ import type {
   ContentAnalysisSummaryResult,
   ContentParsing,
   ContentParsingRequest,
-  Country,
   CountryFilteredPaginationParams,
   CurrencyEntry,
   DataforseoLabsCategory,
@@ -105,7 +103,6 @@ import type {
   FxLatestResponse,
   FxPairResponse,
   FxQuotaResponse,
-  GeographicRegion,
   GoogleAdsAdTrafficByKeywordsRequest,
   GoogleAdsAdTrafficResult,
   GoogleAdsAdvertisersSearchInput,
@@ -185,7 +182,6 @@ import type {
   ReferringDomainsResult,
   ReferringNetworksRequest,
   ReferringNetworksResult,
-  Region,
   RelatedKeywordsRequest,
   RelatedKeywordsResult,
   RelevantPagesRequest,
@@ -261,7 +257,7 @@ import type {
   WhoisListResult,
 } from "./types/index.js";
 
-const STATIC = "/data/static/v1";
+const AIR = "/data/air/v1";
 const FX = "/data/fx/v1";
 const SEO = "/data/seo/v1";
 const REVIEWS = "/data/reviews/v1";
@@ -279,7 +275,7 @@ interface AsyncListParams extends PaginationParams {
 }
 
 /**
- * Public client for the Voyant Data API. All eight sub-products (`static`,
+ * Public client for the Voyant Data API. All eight sub-products (`air`,
  * `fx`, `seo`, `reviews`, `hotels`, `restaurants`, `experiences`, `geo`) are
  * routed through `api.voyantjs.com/data/{product}/v1/*`.
  */
@@ -288,7 +284,7 @@ export class VoyantDataClient {
   /** Default language for geo reads; see {@link VoyantDataClientOptions.lang}. */
   private readonly lang?: string;
 
-  readonly static: ReturnType<VoyantDataClient["buildStatic"]>;
+  readonly air: ReturnType<VoyantDataClient["buildAir"]>;
   readonly fx: ReturnType<VoyantDataClient["buildFx"]>;
   readonly seo: ReturnType<VoyantDataClient["buildSeo"]>;
   readonly geo: ReturnType<VoyantDataClient["buildGeo"]>;
@@ -309,7 +305,7 @@ export class VoyantDataClient {
   constructor(options: VoyantDataClientOptions) {
     this.transport = new VoyantTransport(options);
     this.lang = options.lang;
-    this.static = this.buildStatic();
+    this.air = this.buildAir();
     this.fx = this.buildFx();
     this.seo = this.buildSeo();
     this.geo = this.buildGeo();
@@ -425,6 +421,41 @@ export class VoyantDataClient {
             direction: "outgoing",
           }),
       },
+      // Reference catalogs that pair with the gazetteer but are not places:
+      // languages, currencies, timezones (served under /data/geo/v1/reference/*).
+      reference: {
+        languages: {
+          list: () =>
+            t.request<ListResponse<LanguageEntry>>(
+              `${GEO}/reference/languages`,
+              { unwrapData: false },
+            ),
+          get: (code: string) =>
+            t.request<SingleResponse<LanguageEntry>>(
+              `${GEO}/reference/languages/${enc(code)}`,
+              { unwrapData: false },
+            ),
+        },
+        currencies: {
+          list: () =>
+            t.request<ListResponse<CurrencyEntry>>(
+              `${GEO}/reference/currencies`,
+              { unwrapData: false },
+            ),
+          get: (code: string) =>
+            t.request<SingleResponse<CurrencyEntry>>(
+              `${GEO}/reference/currencies/${enc(code)}`,
+              { unwrapData: false },
+            ),
+        },
+        timezones: {
+          list: () =>
+            t.request<ListResponse<TimezoneEntry>>(
+              `${GEO}/reference/timezones`,
+              { unwrapData: false },
+            ),
+        },
+      },
       /** Resolve a single provider label/code to a canonical place (any type). */
       resolve: (
         label: string,
@@ -438,69 +469,24 @@ export class VoyantDataClient {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // /data/static — owned reference data
+  // /data/air — aviation reference data (airports, airlines, aircraft)
   // ─────────────────────────────────────────────────────────────
 
-  private buildStatic() {
+  private buildAir() {
     const t = this.transport;
     return {
-      countries: {
-        list: (params?: { region?: string; subregion?: string }) =>
-          t.request<ListResponse<Country>>(`${STATIC}/countries`, {
-            query: params,
-            unwrapData: false,
-          }),
-        get: (iso2: string) =>
-          t.request<SingleResponse<Country>>(
-            `${STATIC}/countries/${enc(iso2)}`,
-            { unwrapData: false },
-          ),
-      },
-      regions: {
-        list: (params?: { country?: string; type?: string }) =>
-          t.request<ListResponse<Region>>(`${STATIC}/regions`, {
-            query: params,
-            unwrapData: false,
-          }),
-        get: (code: string) =>
-          t.request<SingleResponse<Region>>(`${STATIC}/regions/${enc(code)}`, {
-            unwrapData: false,
-          }),
-      },
-      cities: {
-        get: (id: string) =>
-          t.request<SingleResponse<City>>(`${STATIC}/cities/${enc(id)}`, {
-            unwrapData: false,
-          }),
-        search: (params: { q: string; country?: string; limit?: number }) =>
-          t.request<ListResponse<City>>(`${STATIC}/cities/search`, {
-            query: params,
-            unwrapData: false,
-          }),
-        nearby: (params: {
-          latitude: number;
-          longitude: number;
-          radiusKm: number;
-          limit?: number;
-        }) =>
-          t.request<ListResponse<City & { distanceKm: number }>>(
-            `${STATIC}/cities/nearby`,
-            { query: params, unwrapData: false },
-          ),
-      },
       airports: {
         get: (iata: string) =>
-          t.request<SingleResponse<Airport>>(
-            `${STATIC}/airports/${enc(iata)}`,
-            { unwrapData: false },
-          ),
+          t.request<SingleResponse<Airport>>(`${AIR}/airports/${enc(iata)}`, {
+            unwrapData: false,
+          }),
         search: (params: {
           q: string;
           country?: string;
           scheduledServiceOnly?: boolean;
           limit?: number;
         }) =>
-          t.request<ListResponse<Airport>>(`${STATIC}/airports/search`, {
+          t.request<ListResponse<Airport>>(`${AIR}/airports/search`, {
             query: params,
             unwrapData: false,
           }),
@@ -512,78 +498,36 @@ export class VoyantDataClient {
           limit?: number;
         }) =>
           t.request<ListResponse<Airport & { distanceKm: number }>>(
-            `${STATIC}/airports/nearby`,
+            `${AIR}/airports/nearby`,
             { query: params, unwrapData: false },
           ),
       },
       airlines: {
         get: (iata: string) =>
-          t.request<SingleResponse<Airline>>(
-            `${STATIC}/airlines/${enc(iata)}`,
-            { unwrapData: false },
-          ),
+          t.request<SingleResponse<Airline>>(`${AIR}/airlines/${enc(iata)}`, {
+            unwrapData: false,
+          }),
         search: (params: {
           q: string;
           country?: string;
           activeOnly?: boolean;
           limit?: number;
         }) =>
-          t.request<ListResponse<Airline>>(`${STATIC}/airlines/search`, {
+          t.request<ListResponse<Airline>>(`${AIR}/airlines/search`, {
             query: params,
             unwrapData: false,
           }),
       },
       aircraft: {
         list: (params?: { manufacturer?: string; category?: string }) =>
-          t.request<ListResponse<Aircraft>>(`${STATIC}/aircraft`, {
+          t.request<ListResponse<Aircraft>>(`${AIR}/aircraft`, {
             query: params,
             unwrapData: false,
           }),
         get: (iata: string) =>
-          t.request<SingleResponse<Aircraft>>(
-            `${STATIC}/aircraft/${enc(iata)}`,
-            { unwrapData: false },
-          ),
-      },
-      languages: {
-        list: () =>
-          t.request<ListResponse<LanguageEntry>>(`${STATIC}/languages`, {
+          t.request<SingleResponse<Aircraft>>(`${AIR}/aircraft/${enc(iata)}`, {
             unwrapData: false,
           }),
-        get: (code: string) =>
-          t.request<SingleResponse<LanguageEntry>>(
-            `${STATIC}/languages/${enc(code)}`,
-            { unwrapData: false },
-          ),
-      },
-      currencies: {
-        list: () =>
-          t.request<ListResponse<CurrencyEntry>>(`${STATIC}/currencies`, {
-            unwrapData: false,
-          }),
-        get: (code: string) =>
-          t.request<SingleResponse<CurrencyEntry>>(
-            `${STATIC}/currencies/${enc(code)}`,
-            { unwrapData: false },
-          ),
-      },
-      timezones: {
-        list: () =>
-          t.request<ListResponse<TimezoneEntry>>(`${STATIC}/timezones`, {
-            unwrapData: false,
-          }),
-      },
-      geographicRegions: {
-        list: () =>
-          t.request<ListResponse<GeographicRegion>>(
-            `${STATIC}/geographic-regions`,
-            { unwrapData: false },
-          ),
-        get: (code: string) =>
-          t.request<SingleResponse<GeographicRegion>>(
-            `${STATIC}/geographic-regions/${enc(code)}`,
-            { unwrapData: false },
-          ),
       },
     };
   }

@@ -24,7 +24,13 @@ import ts from "typescript";
 
 const repoRoot = path.resolve(import.meta.dirname, "..");
 const routesFile = path.join(repoRoot, "generated", "public-routes.json");
-const dataClientFile = path.join(repoRoot, "packages", "data-sdk", "src", "client.ts");
+const dataClientFile = path.join(
+  repoRoot,
+  "packages",
+  "data-sdk",
+  "src",
+  "client.ts",
+);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -43,8 +49,6 @@ function normalizeRoute(route) {
   const [pathWithoutQuery] = fullPath.split("?");
   return `${method} ${normalizeParameterizedPath(pathWithoutQuery)}`;
 }
-
-
 
 function resolveRequestMethod(callExpression) {
   const options = callExpression.arguments[1];
@@ -108,7 +112,11 @@ function resolvePrefixConstants(sourceFile) {
 function findLocalDeclaration(name, fromNode) {
   let cursor = fromNode;
   while (cursor) {
-    if (ts.isBlock(cursor) || ts.isSourceFile(cursor) || ts.isFunctionLike(cursor)) {
+    if (
+      ts.isBlock(cursor) ||
+      ts.isSourceFile(cursor) ||
+      ts.isFunctionLike(cursor)
+    ) {
       const statements = cursor.statements ?? cursor.body?.statements ?? [];
       for (const stmt of statements) {
         if (!ts.isVariableStatement(stmt)) continue;
@@ -137,10 +145,7 @@ function findLocalDeclaration(name, fromNode) {
  */
 function expandNodeToStrings(node, prefixes) {
   if (!node) return [];
-  if (
-    ts.isStringLiteral(node) ||
-    ts.isNoSubstitutionTemplateLiteral(node)
-  ) {
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
     return [node.text];
   }
   if (ts.isTemplateExpression(node)) {
@@ -296,16 +301,20 @@ function* enclosingFunctions(node) {
 
 function findOwningName(fn) {
   // const post = (...) => ... → name is "post"
-  if (fn.parent && ts.isVariableDeclaration(fn.parent) && ts.isIdentifier(fn.parent.name)) {
+  if (
+    fn.parent &&
+    ts.isVariableDeclaration(fn.parent) &&
+    ts.isIdentifier(fn.parent.name)
+  ) {
     return fn.parent.name.text;
   }
   // function post(...) { ... }
   if (ts.isFunctionDeclaration(fn) && fn.name) return fn.name.text;
   // private buildSearchFeature(...) { ... } — method on a class.
-  if (ts.isMethodDeclaration(fn) && ts.isIdentifier(fn.name)) return fn.name.text;
+  if (ts.isMethodDeclaration(fn) && ts.isIdentifier(fn.name))
+    return fn.name.text;
   return null;
 }
-
 
 /**
  * Returns the set of identifier names that, within the given subtree, alias
@@ -366,7 +375,7 @@ function extractClientRoutes(filePath) {
   const routes = new Map(); // public route → product key
 
   function classifyProduct(expanded) {
-    if (expanded.startsWith("/data/static/")) return "static";
+    if (expanded.startsWith("/data/air/")) return "air";
     if (expanded.startsWith("/data/fx/")) return "fx";
     if (expanded.startsWith("/data/seo/")) return "seo";
     if (expanded.startsWith("/data/reviews/")) return "reviews";
@@ -401,8 +410,12 @@ function verifyProductCoverage(product, clientRoutes, manifestRoutes) {
   const actual = new Set(clientRoutes.map(normalizeRoute));
   const expected = new Set(manifestRoutes.map(normalizeRoute));
 
-  const missingRoutes = [...expected].filter((route) => !actual.has(route)).sort();
-  const unexpectedRoutes = [...actual].filter((route) => !expected.has(route)).sort();
+  const missingRoutes = [...expected]
+    .filter((route) => !actual.has(route))
+    .sort();
+  const unexpectedRoutes = [...actual]
+    .filter((route) => !expected.has(route))
+    .sort();
 
   assert.equal(
     missingRoutes.length,
@@ -416,7 +429,10 @@ function verifyProductCoverage(product, clientRoutes, manifestRoutes) {
   );
 }
 
-assert.ok(fs.existsSync(routesFile), "generated/public-routes.json is missing.");
+assert.ok(
+  fs.existsSync(routesFile),
+  "generated/public-routes.json is missing.",
+);
 assert.ok(
   fs.existsSync(dataClientFile),
   "packages/data-sdk/src/client.ts is missing.",
@@ -434,7 +450,7 @@ for (const [route, product] of clientRoutesByProduct) {
 }
 
 const productOrder = [
-  "static",
+  "air",
   "fx",
   "seo",
   "reviews",

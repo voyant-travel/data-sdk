@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -26,9 +32,13 @@ function packPackage(packageDir) {
 }
 
 function readPackedManifest(tarballPath) {
-  const raw = execFileSync("tar", ["-xOf", tarballPath, "package/package.json"], {
-    encoding: "utf8",
-  });
+  const raw = execFileSync(
+    "tar",
+    ["-xOf", tarballPath, "package/package.json"],
+    {
+      encoding: "utf8",
+    },
+  );
 
   return JSON.parse(raw);
 }
@@ -49,7 +59,9 @@ function installPackedPackage(appDir, tarballPath, packageName) {
   const extractDir = mkdtempSync(path.join(tmpdir(), "voyant-sdk-unpack-"));
 
   mkdirSync(scopeDir, { recursive: true });
-  execFileSync("tar", ["-xzf", tarballPath, "-C", extractDir], { encoding: "utf8" });
+  execFileSync("tar", ["-xzf", tarballPath, "-C", extractDir], {
+    encoding: "utf8",
+  });
   renameSync(path.join(extractDir, "package"), packageDir);
   rmSync(extractDir, { force: true, recursive: true });
 }
@@ -93,17 +105,20 @@ function verifyInstalledImports(tarballs) {
 
           const data = createVoyantDataClient({ apiKey: "data_key" });
 
-          // static
-          assert.equal(typeof data.static.countries.list, "function");
-          assert.equal(typeof data.static.countries.get, "function");
-          assert.equal(typeof data.static.airports.search, "function");
-          assert.equal(typeof data.static.airports.nearby, "function");
-          assert.equal(typeof data.static.airlines.get, "function");
-          assert.equal(typeof data.static.aircraft.list, "function");
-          assert.equal(typeof data.static.languages.list, "function");
-          assert.equal(typeof data.static.currencies.get, "function");
-          assert.equal(typeof data.static.timezones.list, "function");
-          assert.equal(typeof data.static.geographicRegions.list, "function");
+          // air
+          assert.equal(typeof data.air.airports.get, "function");
+          assert.equal(typeof data.air.airports.search, "function");
+          assert.equal(typeof data.air.airports.nearby, "function");
+          assert.equal(typeof data.air.airlines.get, "function");
+          assert.equal(typeof data.air.airlines.search, "function");
+          assert.equal(typeof data.air.aircraft.list, "function");
+          assert.equal(typeof data.air.aircraft.get, "function");
+
+          // geo (places + reference)
+          assert.equal(typeof data.geo.countries.list, "function");
+          assert.equal(typeof data.geo.reference.languages.list, "function");
+          assert.equal(typeof data.geo.reference.currencies.get, "function");
+          assert.equal(typeof data.geo.reference.timezones.list, "function");
 
           // fx
           assert.equal(typeof data.fx.latest, "function");
@@ -201,18 +216,14 @@ function verifyInstalledTypecheck(tarballs) {
           type Airline,
           type Airport,
           type AirportType,
-          type City,
-          type Country,
           type CurrencyEntry,
           type FxLatestResponse,
           type FxPairResponse,
-          type GeographicRegion,
           type GoogleHotelSearchesRequest,
           type GoogleQaRequest,
           type GoogleReviewsRequest,
           type LanguageEntry,
           type ListResponse,
-          type Region,
           type Search,
           type SingleResponse,
           type TimezoneEntry,
@@ -225,29 +236,21 @@ function verifyInstalledTypecheck(tarballs) {
           apiKey: "data_key",
         } satisfies VoyantDataClientOptions);
 
-        // static
-        const countriesPromise: Promise<ListResponse<Country>> =
-          client.static.countries.list({ region: "Europe" });
-        const countryPromise: Promise<SingleResponse<Country>> =
-          client.static.countries.get("RO");
-        const regionPromise: Promise<SingleResponse<Region>> =
-          client.static.regions.get("US-CA");
-        const cityPromise: Promise<SingleResponse<City>> =
-          client.static.cities.get("2643743");
+        // air
         const airportPromise: Promise<SingleResponse<Airport>> =
-          client.static.airports.get("LHR");
+          client.air.airports.get("LHR");
         const airlinePromise: Promise<SingleResponse<Airline>> =
-          client.static.airlines.get("BA");
+          client.air.airlines.get("BA");
         const aircraftPromise: Promise<SingleResponse<Aircraft>> =
-          client.static.aircraft.get("359");
+          client.air.aircraft.get("359");
+
+        // geo reference (languages / currencies / timezones)
         const languagesPromise: Promise<ListResponse<LanguageEntry>> =
-          client.static.languages.list();
+          client.geo.reference.languages.list();
         const currenciesPromise: Promise<ListResponse<CurrencyEntry>> =
-          client.static.currencies.list();
+          client.geo.reference.currencies.list();
         const timezonesPromise: Promise<ListResponse<TimezoneEntry>> =
-          client.static.timezones.list();
-        const geoRegionsPromise: Promise<ListResponse<GeographicRegion>> =
-          client.static.geographicRegions.list();
+          client.geo.reference.timezones.list();
 
         // fx
         const fxLatestPromise: Promise<FxLatestResponse> = client.fx.latest("EUR");
@@ -274,17 +277,12 @@ function verifyInstalledTypecheck(tarballs) {
         const airportType: AirportType = "large_airport";
         const aircraftCategory: AircraftCategory = "wide_body";
 
-        void countriesPromise;
-        void countryPromise;
-        void regionPromise;
-        void cityPromise;
         void airportPromise;
         void airlinePromise;
         void aircraftPromise;
         void languagesPromise;
         void currenciesPromise;
         void timezonesPromise;
-        void geoRegionsPromise;
         void fxLatestPromise;
         void fxPairPromise;
         void serpCreatePromise;
@@ -295,7 +293,11 @@ function verifyInstalledTypecheck(tarballs) {
 
     execFileSync(
       process.execPath,
-      [path.join(repoRoot, "node_modules", "typescript", "bin", "tsc"), "-p", appDir],
+      [
+        path.join(repoRoot, "node_modules", "typescript", "bin", "tsc"),
+        "-p",
+        appDir,
+      ],
       {
         cwd: appDir,
         encoding: "utf8",
@@ -329,9 +331,17 @@ try {
     assert.ok(files.includes("package/package.json"));
     assert.ok(files.includes("package/dist/index.js"));
     assert.ok(files.includes("package/dist/index.d.ts"));
-    assert.ok(files.includes("package/node_modules/@voyant-sdk/sdk-core/package.json"));
-    assert.ok(files.includes("package/node_modules/@voyant-sdk/sdk-core/dist/index.js"));
-    assert.ok(files.includes("package/node_modules/@voyant-sdk/sdk-core/dist/index.d.ts"));
+    assert.ok(
+      files.includes("package/node_modules/@voyant-sdk/sdk-core/package.json"),
+    );
+    assert.ok(
+      files.includes("package/node_modules/@voyant-sdk/sdk-core/dist/index.js"),
+    );
+    assert.ok(
+      files.includes(
+        "package/node_modules/@voyant-sdk/sdk-core/dist/index.d.ts",
+      ),
+    );
 
     const hasSrcFiles = files.some((file) => file.startsWith("package/src/"));
     assert.equal(hasSrcFiles, false);

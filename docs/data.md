@@ -4,23 +4,25 @@
 
 ## Sub-products
 
-The Voyant Data product is composed of seven Cloudflare Workers served
+The Voyant Data product is composed of eight Cloudflare Workers served
 behind the public gateway at `https://api.voyantjs.com/data/{product}/v1/*`:
 
-- `static` — typed reference data (countries, regions, cities, airports,
-  airlines, aircraft, languages, currencies, timezones, geographic regions)
+- `air` — aviation reference data (airports, airlines, aircraft)
 - `fx` — currency exchange (exchangerate-api.com white-label, `/data/fx/v1/fx/*`)
 - `seo` — DataForSEO white-label, organized by sub-product
 - `reviews` — Google Reviews / Extended Reviews / Q&A + Trustpilot
 - `hotels` — Google Hotels + TripAdvisor (hotel-scoped)
 - `restaurants` — TripAdvisor restaurants
 - `experiences` — TripAdvisor attractions / experiences
+- `geo` — canonical travel geography (countries, regions, cities, ports,
+  waterways) + reference lookups (languages, currencies, timezones)
 
 ## Current shape
 
 Every sub-product is a top-level namespace on the client. Examples:
 
-- `client.static.countries.list({ region: "Europe" })`
+- `client.air.airports.get("LHR")`
+- `client.geo.countries.list()`
 - `client.fx.latest("USD")`
 - `client.seo.serp.google.organic.searches.create(input)`
 - `client.seo.backlinks.summary.create(input)`
@@ -36,8 +38,10 @@ nextCursor? }`); `get(id)` returns `SingleResponse<T>` (`{ data }`).
 
 ## Key public types
 
-- static: `Country`, `Region`, `City`, `Airport`, `Airline`, `Aircraft`,
-  `LanguageEntry`, `CurrencyEntry`, `TimezoneEntry`, `GeographicRegion`
+- air: `Airport`, `AirportType`, `Airline`, `Aircraft`, `AircraftCategory`
+- geo: `CanonicalPlace`, `CanonicalPlaceType`, `PlaceWithRelations`,
+  `PlaceResolveRequest`, `PlaceResolveResult`, `LanguageEntry`,
+  `CurrencyEntry`, `TimezoneEntry`
 - envelopes: `ListResponse<T>`, `SingleResponse<T>`, `PaginationParams`
 - fx: `FxLatestResponse`, `FxPairResponse`, `FxEnrichedResponse`,
   `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`
@@ -53,13 +57,14 @@ nextCursor? }`); `get(id)` returns `SingleResponse<T>` (`{ data }`).
 
 API tokens are scoped per sub-product:
 
-- `client.static.*` requires `data:static:read`
+- `client.air.*` requires `data:air:read`
 - `client.fx.*` requires `data:fx:read`
 - `client.seo.*` requires `data:seo:read`
 - `client.reviews.*` requires `data:reviews:read`
 - `client.hotels.*` requires `data:hotels:read`
 - `client.restaurants.*` requires `data:restaurants:read`
 - `client.experiences.*` requires `data:experiences:read`
+- `client.geo.*` requires `data:geo:read`
 
 ## Example
 
@@ -70,8 +75,8 @@ const client = createVoyantDataClient({
   apiKey: process.env.VOYANT_API_KEY!,
 });
 
-const europeanCountries = await client.static.countries.list({ region: "Europe" });
-const lhr = await client.static.airports.get("LHR");
+const countries = await client.geo.countries.list();
+const lhr = await client.air.airports.get("LHR");
 const eurUsd = await client.fx.pair("EUR", "USD", 100);
 ```
 

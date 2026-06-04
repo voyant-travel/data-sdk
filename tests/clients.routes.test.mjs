@@ -4,8 +4,8 @@ import test from "node:test";
 import { createVoyantDataClient } from "../packages/data-sdk/dist/index.js";
 
 /**
- * The data client is namespaced per sub-product (`static`, `fx`, `seo`,
- * `reviews`, `hotels`, `restaurants`, `experiences`). These smoke tests
+ * The data client is namespaced per sub-product (`air`, `fx`, `seo`,
+ * `reviews`, `hotels`, `restaurants`, `experiences`, `geo`). These smoke tests
  * record the URL + method seen by the transport for one representative
  * call in each top-level namespace. They do not exhaust every method —
  * `verify-client-route-coverage` enforces per-route parity against the
@@ -33,70 +33,40 @@ function createRecorder({ responseBody = { data: [], totalCount: 0 } } = {}) {
   };
 }
 
-test("static — composes country, region, city, airport, airline, aircraft, and reference routes", async () => {
-  const recorder = createRecorder({ responseBody: { data: [], totalCount: 0 } });
+test("air — composes airport, airline, and aircraft routes", async () => {
+  const recorder = createRecorder({
+    responseBody: { data: [], totalCount: 0 },
+  });
   const client = createVoyantDataClient({
-    apiKey: "static_key",
+    apiKey: "air_key",
     fetch: recorder.fetch,
   });
 
-  await client.static.countries.list({ region: "Europe" });
-  await client.static.countries.get("RO");
-  await client.static.regions.list({ country: "US", type: "state" });
-  await client.static.regions.get("US-CA");
-  await client.static.cities.search({ q: "London", country: "GB" });
-  await client.static.cities.nearby({
-    latitude: 51.5,
-    longitude: -0.1,
-    radiusKm: 25,
-  });
-  await client.static.cities.get("2643743");
-  await client.static.airports.search({
+  await client.air.airports.search({
     q: "heathrow",
     country: "GB",
     scheduledServiceOnly: true,
     limit: 5,
   });
-  await client.static.airports.nearby({
+  await client.air.airports.nearby({
     latitude: 51.5,
     longitude: -0.1,
     radiusKm: 50,
   });
-  await client.static.airports.get("LHR");
-  await client.static.airlines.search({ q: "british", activeOnly: true });
-  await client.static.airlines.get("BA");
-  await client.static.aircraft.list({ category: "wide_body" });
-  await client.static.aircraft.get("359");
-  await client.static.languages.list();
-  await client.static.languages.get("en");
-  await client.static.currencies.list();
-  await client.static.currencies.get("USD");
-  await client.static.timezones.list();
-  await client.static.geographicRegions.list();
-  await client.static.geographicRegions.get("eu");
+  await client.air.airports.get("LHR");
+  await client.air.airlines.search({ q: "british", activeOnly: true });
+  await client.air.airlines.get("BA");
+  await client.air.aircraft.list({ category: "wide_body" });
+  await client.air.aircraft.get("359");
 
   const expected = [
-    "GET /data/static/v1/countries?region=Europe",
-    "GET /data/static/v1/countries/RO",
-    "GET /data/static/v1/regions?country=US&type=state",
-    "GET /data/static/v1/regions/US-CA",
-    "GET /data/static/v1/cities/search?q=London&country=GB",
-    "GET /data/static/v1/cities/nearby?latitude=51.5&longitude=-0.1&radiusKm=25",
-    "GET /data/static/v1/cities/2643743",
-    "GET /data/static/v1/airports/search?q=heathrow&country=GB&scheduledServiceOnly=true&limit=5",
-    "GET /data/static/v1/airports/nearby?latitude=51.5&longitude=-0.1&radiusKm=50",
-    "GET /data/static/v1/airports/LHR",
-    "GET /data/static/v1/airlines/search?q=british&activeOnly=true",
-    "GET /data/static/v1/airlines/BA",
-    "GET /data/static/v1/aircraft?category=wide_body",
-    "GET /data/static/v1/aircraft/359",
-    "GET /data/static/v1/languages",
-    "GET /data/static/v1/languages/en",
-    "GET /data/static/v1/currencies",
-    "GET /data/static/v1/currencies/USD",
-    "GET /data/static/v1/timezones",
-    "GET /data/static/v1/geographic-regions",
-    "GET /data/static/v1/geographic-regions/eu",
+    "GET /data/air/v1/airports/search?q=heathrow&country=GB&scheduledServiceOnly=true&limit=5",
+    "GET /data/air/v1/airports/nearby?latitude=51.5&longitude=-0.1&radiusKm=50",
+    "GET /data/air/v1/airports/LHR",
+    "GET /data/air/v1/airlines/search?q=british&activeOnly=true",
+    "GET /data/air/v1/airlines/BA",
+    "GET /data/air/v1/aircraft?category=wide_body",
+    "GET /data/air/v1/aircraft/359",
   ];
 
   for (const [index, line] of expected.entries()) {
@@ -112,30 +82,27 @@ test("static — composes country, region, city, airport, airline, aircraft, and
       `https://api.voyantjs.com${pathAndQuery}`,
       `call ${index} should target ${pathAndQuery}`,
     );
-    assert.equal(
-      call.headers.get("authorization"),
-      "Bearer static_key",
-    );
+    assert.equal(call.headers.get("authorization"), "Bearer air_key");
   }
 });
 
-test("static — filters undefined query params", async () => {
+test("air — filters undefined query params", async () => {
   const recorder = createRecorder();
   const client = createVoyantDataClient({
-    apiKey: "static_key",
+    apiKey: "air_key",
     fetch: recorder.fetch,
   });
 
-  await client.static.countries.list({});
-  await client.static.countries.list({ region: undefined });
+  await client.air.aircraft.list({});
+  await client.air.aircraft.list({ manufacturer: undefined });
 
   assert.equal(
     recorder.calls[0].url,
-    "https://api.voyantjs.com/data/static/v1/countries",
+    "https://api.voyantjs.com/data/air/v1/aircraft",
   );
   assert.equal(
     recorder.calls[1].url,
-    "https://api.voyantjs.com/data/static/v1/countries",
+    "https://api.voyantjs.com/data/air/v1/aircraft",
   );
 });
 
@@ -253,13 +220,28 @@ test("reviews — google + trustpilot async resources hit the right URLs", async
   await client.reviews.google.reviews.get("rev_1");
   await client.reviews.google.qa.run({ keyword: "Eiffel Tower" });
   await client.reviews.trustpilot.search.create({ domain: "voyantjs.com" });
-  await client.reviews.trustpilot.reviews.list({ status: "succeeded", limit: 5 });
+  await client.reviews.trustpilot.reviews.list({
+    status: "succeeded",
+    limit: 5,
+  });
 
   const expected = [
-    { method: "POST", url: "https://api.voyantjs.com/data/reviews/v1/google/reviews" },
-    { method: "GET", url: "https://api.voyantjs.com/data/reviews/v1/google/reviews/rev_1" },
-    { method: "POST", url: "https://api.voyantjs.com/data/reviews/v1/google/qa:run" },
-    { method: "POST", url: "https://api.voyantjs.com/data/reviews/v1/trustpilot/searches" },
+    {
+      method: "POST",
+      url: "https://api.voyantjs.com/data/reviews/v1/google/reviews",
+    },
+    {
+      method: "GET",
+      url: "https://api.voyantjs.com/data/reviews/v1/google/reviews/rev_1",
+    },
+    {
+      method: "POST",
+      url: "https://api.voyantjs.com/data/reviews/v1/google/qa:run",
+    },
+    {
+      method: "POST",
+      url: "https://api.voyantjs.com/data/reviews/v1/trustpilot/searches",
+    },
     {
       method: "GET",
       url: "https://api.voyantjs.com/data/reviews/v1/trustpilot/reviews?status=succeeded&limit=5",
