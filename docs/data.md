@@ -8,14 +8,14 @@ The Voyant Data product is composed of eight Cloudflare Workers served
 behind the public gateway at `https://api.voyantjs.com/data/{product}/v1/*`:
 
 - `air` — aviation reference data (airports, airlines, aircraft)
-- `fx` — currency exchange (exchangerate-api.com white-label, `/data/fx/v1/fx/*`)
+- `fx` — currency exchange (exchangerate-api.com white-label, `/data/fx/v1/fx/*`) + the ISO 4217 currency catalog (`/data/fx/v1/currencies`)
 - `seo` — DataForSEO white-label, organized by sub-product
 - `reviews` — Google Reviews / Extended Reviews / Q&A + Trustpilot
 - `hotels` — Google Hotels + TripAdvisor (hotel-scoped)
 - `restaurants` — TripAdvisor restaurants
 - `experiences` — TripAdvisor attractions / experiences
 - `geo` — canonical travel geography (countries, regions, cities, ports,
-  waterways) + reference lookups (languages, currencies, timezones)
+  waterways) + reference lookups (languages, timezones)
 
 ## Current shape
 
@@ -40,11 +40,10 @@ nextCursor? }`); `get(id)` returns `SingleResponse<T>` (`{ data }`).
 
 - air: `Airport`, `AirportType`, `Airline`, `Aircraft`, `AircraftCategory`
 - geo: `CanonicalPlace`, `CanonicalPlaceType`, `PlaceWithRelations`,
-  `PlaceResolveRequest`, `PlaceResolveResult`, `LanguageEntry`,
-  `CurrencyEntry`, `TimezoneEntry`
+  `PlaceResolveRequest`, `PlaceResolveResult`, `LanguageEntry`, `TimezoneEntry`
 - envelopes: `ListResponse<T>`, `SingleResponse<T>`, `PaginationParams`
 - fx: `FxLatestResponse`, `FxPairResponse`, `FxEnrichedResponse`,
-  `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`
+  `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`, `CurrencyEntry`
 - seo / serp: `Search`, `GoogleOrganicSearchInput`, `GoogleAiModeSearchInput`,
   `GoogleMapsSearchInput`, `ScreenshotResult`, `AiSummaryResult`
 - verticals: `GoogleReviewsRequest`, `GoogleQaRequest`,
