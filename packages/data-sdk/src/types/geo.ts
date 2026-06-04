@@ -169,22 +169,14 @@ export type PlaceListParams = PlaceLangParams & {
 };
 
 // ─── Reference catalogs (not places) ───
-// Languages, currencies, and timezones pair with the gazetteer but are not
-// places. Served under `/data/geo/v1/reference/*` (bundled static data).
+// Languages and timezones decode geo's own data (multilingual place names;
+// place/airport timezone fields) but are not places. Served under
+// `/data/geo/v1/reference/*` (bundled static data). Currencies live with the
+// FX product — see `CurrencyEntry` in `./fx`.
 
 export interface LanguageEntry {
   code: string;
   name: string;
-}
-
-export interface CurrencyEntry {
-  code: string;
-  name: string;
-  namePlural: string;
-  symbol: string;
-  symbolNative: string;
-  decimalDigits: number;
-  rounding: number;
 }
 
 export interface TimezoneEntry {

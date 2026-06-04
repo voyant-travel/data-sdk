@@ -5,6 +5,20 @@
  */
 export type FxSource = "bnr" | "voyant-data-fx";
 
+/**
+ * ISO 4217 currency catalog entry (`/data/fx/v1/currencies`) — the canonical
+ * formatting/decoder catalog, distinct from the live `fx.codes()` supported set.
+ */
+export interface CurrencyEntry {
+  code: string;
+  name: string;
+  namePlural: string;
+  symbol: string;
+  symbolNative: string;
+  decimalDigits: number;
+  rounding: number;
+}
+
 export interface FxResponse extends Record<string, unknown> {
   source?: FxSource;
 }

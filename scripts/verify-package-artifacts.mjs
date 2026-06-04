@@ -117,7 +117,6 @@ function verifyInstalledImports(tarballs) {
           // geo (places + reference)
           assert.equal(typeof data.geo.countries.list, "function");
           assert.equal(typeof data.geo.reference.languages.list, "function");
-          assert.equal(typeof data.geo.reference.currencies.get, "function");
           assert.equal(typeof data.geo.reference.timezones.list, "function");
 
           // fx
@@ -127,6 +126,8 @@ function verifyInstalledImports(tarballs) {
           assert.equal(typeof data.fx.history, "function");
           assert.equal(typeof data.fx.codes, "function");
           assert.equal(typeof data.fx.quota, "function");
+          assert.equal(typeof data.fx.currencies.list, "function");
+          assert.equal(typeof data.fx.currencies.get, "function");
 
           // seo
           assert.equal(typeof data.seo.serp.google.organic.searches.create, "function");
@@ -244,13 +245,15 @@ function verifyInstalledTypecheck(tarballs) {
         const aircraftPromise: Promise<SingleResponse<Aircraft>> =
           client.air.aircraft.get("359");
 
-        // geo reference (languages / currencies / timezones)
+        // geo reference (languages / timezones)
         const languagesPromise: Promise<ListResponse<LanguageEntry>> =
           client.geo.reference.languages.list();
-        const currenciesPromise: Promise<ListResponse<CurrencyEntry>> =
-          client.geo.reference.currencies.list();
         const timezonesPromise: Promise<ListResponse<TimezoneEntry>> =
           client.geo.reference.timezones.list();
+
+        // fx currency catalog
+        const currenciesPromise: Promise<ListResponse<CurrencyEntry>> =
+          client.fx.currencies.list();
 
         // fx
         const fxLatestPromise: Promise<FxLatestResponse> = client.fx.latest("EUR");

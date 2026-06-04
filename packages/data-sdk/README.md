@@ -64,7 +64,7 @@ const fr = await ro.geo.countries.get("DE", { lang: "fr" }); // per-call overrid
 Every sub-product is a top-level namespace on the client:
 
 - aviation: `client.air.{airports,airlines,aircraft}`
-- currency exchange: `client.fx.{latest,pair,enriched,history,codes,quota}`
+- currency exchange + ISO 4217 catalog: `client.fx.{latest,pair,enriched,history,codes,quota,currencies}`
 - SERP, keywords, AI optimization, backlinks, on-page, content analysis,
   domain analytics, business data, dataforseo-labs:
   `client.seo.{serp,keywordsData,aiOptimization,backlinks,onPage,
@@ -75,7 +75,7 @@ contentAnalysis,domainAnalytics,businessData,dataforseoLabs}`
 - geography: `client.geo.places.{list,search,get,children,ancestors,related,
 resolve}` (the raw routes) plus typed resources
   `client.geo.{countries,regions,subdivisions,cities,ports,rivers}`, reference
-  catalogs `client.geo.reference.{languages,currencies,timezones}`, and a one-shot
+  catalogs `client.geo.reference.{languages,timezones}`, and a one-shot
   `client.geo.resolve(label)`. `geo.places.get(id)` returns the place with its
   outgoing relations inline (e.g. a river's `flows_through` countries).
   Multilingual: set `lang` on the client (or pass `lang` per call) and read the
@@ -97,7 +97,7 @@ Useful exported types include:
 - envelopes: `ListResponse<T>`, `SingleResponse<T>`,
   `PaginationParams`, `CountryFilteredPaginationParams`
 - fx: `FxLatestResponse`, `FxPairResponse`, `FxEnrichedResponse`,
-  `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`
+  `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`, `CurrencyEntry`
 - seo / serp: `Search`, `GoogleOrganicSearchInput`, `GoogleAiModeSearchInput`,
   `GoogleMapsSearchInput`, `ScreenshotResult`, `AiSummaryResult`
 - verticals: `GoogleReviewsRequest`, `GoogleQaRequest`,
@@ -107,7 +107,7 @@ Useful exported types include:
 - geo: `CanonicalPlace`, `CanonicalPlaceType`, `PlaceWithRelations`,
   `PlaceRelation`, `PlaceResolveRequest`, `PlaceResolveResult`,
   `CountryAttributes`, `CityAttributes`, `WaterwayAttributes`, `LanguageEntry`,
-  `CurrencyEntry`, `TimezoneEntry` (+ `placeName` helper)
+  `TimezoneEntry` (+ `placeName` helper)
 - options: `VoyantDataClientOptions`
 
 ## Notes

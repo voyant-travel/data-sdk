@@ -421,8 +421,9 @@ export class VoyantDataClient {
             direction: "outgoing",
           }),
       },
-      // Reference catalogs that pair with the gazetteer but are not places:
-      // languages, currencies, timezones (served under /data/geo/v1/reference/*).
+      // Reference catalogs that decode geo's own data but are not places:
+      // languages (multilingual place names) + timezones (place/airport tz
+      // fields), under /data/geo/v1/reference/*. Currencies live with fx.
       reference: {
         languages: {
           list: () =>
@@ -433,18 +434,6 @@ export class VoyantDataClient {
           get: (code: string) =>
             t.request<SingleResponse<LanguageEntry>>(
               `${GEO}/reference/languages/${enc(code)}`,
-              { unwrapData: false },
-            ),
-        },
-        currencies: {
-          list: () =>
-            t.request<ListResponse<CurrencyEntry>>(
-              `${GEO}/reference/currencies`,
-              { unwrapData: false },
-            ),
-          get: (code: string) =>
-            t.request<SingleResponse<CurrencyEntry>>(
-              `${GEO}/reference/currencies/${enc(code)}`,
               { unwrapData: false },
             ),
         },
@@ -575,6 +564,20 @@ export class VoyantDataClient {
         t.request<FxCodesResponse>(`${base}/codes`, { unwrapData: false }),
       quota: () =>
         t.request<FxQuotaResponse>(`${base}/quota`, { unwrapData: false }),
+      // ISO 4217 currency catalog — Voyant-owned static reference (not a
+      // passthrough), at /data/fx/v1/currencies (no extra /fx segment). The
+      // canonical formatting/decoder catalog; `codes` is the live supported set.
+      currencies: {
+        list: () =>
+          t.request<ListResponse<CurrencyEntry>>(`${FX}/currencies`, {
+            unwrapData: false,
+          }),
+        get: (code: string) =>
+          t.request<SingleResponse<CurrencyEntry>>(
+            `${FX}/currencies/${enc(code)}`,
+            { unwrapData: false },
+          ),
+      },
     };
   }
 

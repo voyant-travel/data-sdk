@@ -9,6 +9,8 @@
     "GET /data/air/v1/airports/search"
   ],
   "fx": [
+    "GET /data/fx/v1/currencies",
+    "GET /data/fx/v1/currencies/:code",
     "GET /data/fx/v1/fx/codes",
     "GET /data/fx/v1/fx/enriched/:base/:target",
     "GET /data/fx/v1/fx/history/:currency/:year/:month/:day",
@@ -266,8 +268,6 @@
     "GET /data/geo/v1/places/:id/children",
     "GET /data/geo/v1/places/:id/related",
     "GET /data/geo/v1/places/search",
-    "GET /data/geo/v1/reference/currencies",
-    "GET /data/geo/v1/reference/currencies/:code",
     "GET /data/geo/v1/reference/languages",
     "GET /data/geo/v1/reference/languages/:code",
     "GET /data/geo/v1/reference/timezones",
