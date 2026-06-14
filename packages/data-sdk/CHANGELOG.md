@@ -1,5 +1,28 @@
 # @voyant-travel/data-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 8fc3ded: Move the ISO 4217 currency catalog from `client.geo.reference.currencies` to
+  `client.fx.currencies`.
+
+  Currency reference belongs with the money product, not geography — `fx` already
+  serves the live supported-code list (`fx.codes()`), so the canonical ISO 4217
+  catalog (names / symbols / decimal digits) now sits beside it at
+  `/data/fx/v1/currencies`. `client.geo.reference` keeps `languages` and
+  `timezones` (the decoders for geo's own multilingual names and place/airport
+  timezone fields). The `CurrencyEntry` type now lives in the fx module (still
+  exported from the package root).
+
+  Mirrors the platform change (currency catalog moved `data-geo` → `data-fx`).
+
+### Patch Changes
+
+- c21e4a9: Rename the GitHub and npm orgs from `voyantjs` to `voyant-travel`. The package
+  is now published as `@voyant-travel/data-sdk` and the default base URL is
+  `https://api.voyant.travel`. Relicense from FSL-1.1-Apache-2.0 to Apache-2.0.
+
 ## 0.4.0
 
 ### Minor Changes
