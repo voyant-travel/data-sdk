@@ -2,13 +2,13 @@
 
 Public TypeScript SDK for the Voyant Data APIs.
 
-This repo owns the `@voyantjs/data-sdk` package and its supporting contract
+This repo owns the `@voyant-travel/data-sdk` package and its supporting contract
 tooling. It does not contain a docs app. For now, repo documentation lives as
 Markdown under [`docs/`](./docs).
 
 ## Packages
 
-- `@voyantjs/data-sdk`: client for the Voyant Data APIs (`/data/static`,
+- `@voyant-travel/data-sdk`: client for the Voyant Data APIs (`/data/static`,
   `/data/fx`, `/data/seo`)
 - `@voyant-sdk/sdk-core`: private shared runtime bundled into the public
   package

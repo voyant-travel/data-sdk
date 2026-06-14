@@ -79,7 +79,7 @@ test("air — composes airport, airline, and aircraft routes", async () => {
     );
     assert.equal(
       call.url,
-      `https://api.voyantjs.com${pathAndQuery}`,
+      `https://api.voyant.travel${pathAndQuery}`,
       `call ${index} should target ${pathAndQuery}`,
     );
     assert.equal(call.headers.get("authorization"), "Bearer air_key");
@@ -98,11 +98,11 @@ test("air — filters undefined query params", async () => {
 
   assert.equal(
     recorder.calls[0].url,
-    "https://api.voyantjs.com/data/air/v1/aircraft",
+    "https://api.voyant.travel/data/air/v1/aircraft",
   );
   assert.equal(
     recorder.calls[1].url,
-    "https://api.voyantjs.com/data/air/v1/aircraft",
+    "https://api.voyant.travel/data/air/v1/aircraft",
   );
 });
 
@@ -138,7 +138,7 @@ test("fx — composes the eight white-label routes including the double-fx prefi
   for (const [index, path] of expected.entries()) {
     assert.equal(
       recorder.calls[index].url,
-      `https://api.voyantjs.com${path}`,
+      `https://api.voyant.travel${path}`,
       `fx call ${index} should target ${path}`,
     );
     assert.equal(recorder.calls[index].method, "GET");
@@ -193,13 +193,13 @@ test("seo — typed SERP namespace composes the locations + organic search route
 
   assert.equal(
     recorder.calls[0].url,
-    "https://api.voyantjs.com/data/seo/v1/serp/google/locations?country=US",
+    "https://api.voyant.travel/data/seo/v1/serp/google/locations?country=US",
   );
   assert.equal(recorder.calls[0].method, "GET");
 
   assert.equal(
     recorder.calls[1].url,
-    "https://api.voyantjs.com/data/seo/v1/serp/google/organic/searches",
+    "https://api.voyant.travel/data/seo/v1/serp/google/organic/searches",
   );
   assert.equal(recorder.calls[1].method, "POST");
   assert.deepEqual(JSON.parse(recorder.calls[1].body), {
@@ -219,7 +219,7 @@ test("reviews — google + trustpilot async resources hit the right URLs", async
   await client.reviews.google.reviews.create({ keyword: "Eiffel Tower" });
   await client.reviews.google.reviews.get("rev_1");
   await client.reviews.google.qa.run({ keyword: "Eiffel Tower" });
-  await client.reviews.trustpilot.search.create({ domain: "voyantjs.com" });
+  await client.reviews.trustpilot.search.create({ domain: "voyant.travel" });
   await client.reviews.trustpilot.reviews.list({
     status: "succeeded",
     limit: 5,
@@ -228,23 +228,23 @@ test("reviews — google + trustpilot async resources hit the right URLs", async
   const expected = [
     {
       method: "POST",
-      url: "https://api.voyantjs.com/data/reviews/v1/google/reviews",
+      url: "https://api.voyant.travel/data/reviews/v1/google/reviews",
     },
     {
       method: "GET",
-      url: "https://api.voyantjs.com/data/reviews/v1/google/reviews/rev_1",
+      url: "https://api.voyant.travel/data/reviews/v1/google/reviews/rev_1",
     },
     {
       method: "POST",
-      url: "https://api.voyantjs.com/data/reviews/v1/google/qa:run",
+      url: "https://api.voyant.travel/data/reviews/v1/google/qa:run",
     },
     {
       method: "POST",
-      url: "https://api.voyantjs.com/data/reviews/v1/trustpilot/searches",
+      url: "https://api.voyant.travel/data/reviews/v1/trustpilot/searches",
     },
     {
       method: "GET",
-      url: "https://api.voyantjs.com/data/reviews/v1/trustpilot/reviews?status=succeeded&limit=5",
+      url: "https://api.voyant.travel/data/reviews/v1/trustpilot/reviews?status=succeeded&limit=5",
     },
   ];
 
@@ -270,23 +270,23 @@ test("hotels — google hotels + tripadvisor reviews compose to the right URLs",
   const expected = [
     {
       method: "POST",
-      url: "https://api.voyantjs.com/data/hotels/v1/google/hotel-searches",
+      url: "https://api.voyant.travel/data/hotels/v1/google/hotel-searches",
     },
     {
       method: "POST",
-      url: "https://api.voyantjs.com/data/hotels/v1/google/hotel-info:run",
+      url: "https://api.voyant.travel/data/hotels/v1/google/hotel-info:run",
     },
     {
       method: "GET",
-      url: "https://api.voyantjs.com/data/hotels/v1/tripadvisor/searches?limit=10",
+      url: "https://api.voyant.travel/data/hotels/v1/tripadvisor/searches?limit=10",
     },
     {
       method: "GET",
-      url: "https://api.voyantjs.com/data/hotels/v1/tripadvisor/reference/locations?country=GB",
+      url: "https://api.voyant.travel/data/hotels/v1/tripadvisor/reference/locations?country=GB",
     },
     {
       method: "GET",
-      url: "https://api.voyantjs.com/data/hotels/v1/tripadvisor/reference/languages",
+      url: "https://api.voyant.travel/data/hotels/v1/tripadvisor/reference/languages",
     },
   ];
 
@@ -310,17 +310,17 @@ test("restaurants — tripadvisor namespace targets /data/restaurants/v1/tripadv
   assert.equal(recorder.calls[0].method, "POST");
   assert.equal(
     recorder.calls[0].url,
-    "https://api.voyantjs.com/data/restaurants/v1/tripadvisor/searches",
+    "https://api.voyant.travel/data/restaurants/v1/tripadvisor/searches",
   );
   assert.equal(recorder.calls[1].method, "GET");
   assert.equal(
     recorder.calls[1].url,
-    "https://api.voyantjs.com/data/restaurants/v1/tripadvisor/reviews/r_1",
+    "https://api.voyant.travel/data/restaurants/v1/tripadvisor/reviews/r_1",
   );
   assert.equal(recorder.calls[2].method, "GET");
   assert.equal(
     recorder.calls[2].url,
-    "https://api.voyantjs.com/data/restaurants/v1/tripadvisor/reference/locations/FR",
+    "https://api.voyant.travel/data/restaurants/v1/tripadvisor/reference/locations/FR",
   );
 });
 
@@ -338,16 +338,16 @@ test("experiences — tripadvisor namespace targets /data/experiences/v1/tripadv
   assert.equal(recorder.calls[0].method, "POST");
   assert.equal(
     recorder.calls[0].url,
-    "https://api.voyantjs.com/data/experiences/v1/tripadvisor/searches",
+    "https://api.voyant.travel/data/experiences/v1/tripadvisor/searches",
   );
   assert.equal(recorder.calls[1].method, "GET");
   assert.equal(
     recorder.calls[1].url,
-    "https://api.voyantjs.com/data/experiences/v1/tripadvisor/reviews?limit=5",
+    "https://api.voyant.travel/data/experiences/v1/tripadvisor/reviews?limit=5",
   );
   assert.equal(recorder.calls[2].method, "GET");
   assert.equal(
     recorder.calls[2].url,
-    "https://api.voyantjs.com/data/experiences/v1/tripadvisor/reference/languages",
+    "https://api.voyant.travel/data/experiences/v1/tripadvisor/reference/languages",
   );
 });

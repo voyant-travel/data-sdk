@@ -2,7 +2,7 @@
 
 ## Packages intended for publish
 
-- `@voyantjs/data-sdk`
+- `@voyant-travel/data-sdk`
 
 ## Private workspace packages
 

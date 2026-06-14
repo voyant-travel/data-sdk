@@ -277,7 +277,7 @@ interface AsyncListParams extends PaginationParams {
 /**
  * Public client for the Voyant Data API. All eight sub-products (`air`,
  * `fx`, `seo`, `reviews`, `hotels`, `restaurants`, `experiences`, `geo`) are
- * routed through `api.voyantjs.com/data/{product}/v1/*`.
+ * routed through `api.voyant.travel/data/{product}/v1/*`.
  */
 export class VoyantDataClient {
   readonly transport: VoyantTransport;

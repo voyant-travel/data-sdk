@@ -124,7 +124,7 @@ function verifyPrivatePackage(relativePath) {
 
 verifyRootPackage();
 verifyPublicPackage("packages/data-sdk/package.json", {
-  name: "@voyantjs/data-sdk",
+  name: "@voyant-travel/data-sdk",
   descriptionKeyword: "Voyant Data",
 });
 verifyPrivatePackage("packages/sdk-core/package.json");

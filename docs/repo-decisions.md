@@ -1,10 +1,10 @@
 # Repo Decisions
 
-`data-sdk` exists to publish the public `@voyantjs/data-sdk` package.
+`data-sdk` exists to publish the public `@voyant-travel/data-sdk` package.
 
 ## What belongs here
 
-- the public `@voyantjs/data-sdk` package
+- the public `@voyant-travel/data-sdk` package
 - shared SDK runtime code consumed by that package
 - package-level tests
 - lightweight Markdown documentation
@@ -21,7 +21,7 @@ generation.
 
 ## Package boundaries
 
-- `@voyantjs/data-sdk` is for the Voyant Data product (`/data/static`,
+- `@voyant-travel/data-sdk` is for the Voyant Data product (`/data/static`,
   `/data/fx`, `/data/seo`)
 - `@voyant-sdk/sdk-core` is private and should contain only transport-level
   concerns

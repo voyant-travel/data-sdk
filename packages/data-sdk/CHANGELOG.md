@@ -1,4 +1,4 @@
-# @voyantjs/data-sdk
+# @voyant-travel/data-sdk
 
 ## 0.4.0
 
@@ -89,9 +89,9 @@
 
 ### Minor Changes
 
-- 59fe70f: Initial release of `@voyantjs/data-sdk` — the public TypeScript client for the Voyant Data API.
+- 59fe70f: Initial release of `@voyant-travel/data-sdk` — the public TypeScript client for the Voyant Data API.
 
-  Covers all seven data sub-products served at `api.voyantjs.com/data/{product}/v1/*`:
+  Covers all seven data sub-products served at `api.voyant.travel/data/{product}/v1/*`:
   - **static** — countries, airports, airlines, cities, currencies, languages, regions, geographic regions, timezones, aircraft (21 routes)
   - **fx** — currency rates with optional history (8 routes)
   - **seo** — SERP (Google/Bing/maps/news/images/autocomplete), DataForSEO Labs, Backlinks, On-Page, Content Analysis, Domain Analytics, AI Optimization, Keywords Data, Business Listings, Google My Business (180 routes)
