@@ -1,5 +1,5 @@
 ---
-"@voyantjs/data-sdk": major
+"@voyant-travel/data-sdk": major
 ---
 
 Move the ISO 4217 currency catalog from `client.geo.reference.currencies` to

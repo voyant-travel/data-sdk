@@ -1,6 +1,6 @@
 # Release Model
 
-This repo publishes the `@voyantjs/data-sdk` package.
+This repo publishes the `@voyant-travel/data-sdk` package.
 
 ## Release expectations
 
@@ -9,7 +9,7 @@ This repo publishes the `@voyantjs/data-sdk` package.
 
 ## Stability model
 
-`@voyantjs/data-sdk` is the public SDK. `@voyant-sdk/sdk-core` is a private
+`@voyant-travel/data-sdk` is the public SDK. `@voyant-sdk/sdk-core` is a private
 runtime bundled into the public package and is not part of the public
 support surface.
 

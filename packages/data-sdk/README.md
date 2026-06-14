@@ -1,10 +1,10 @@
-# `@voyantjs/data-sdk`
+# `@voyant-travel/data-sdk`
 
 Public TypeScript client for the Voyant Data APIs.
 
 ## Scope
 
-`@voyantjs/data-sdk` is the unified client for the eight sub-products that
+`@voyant-travel/data-sdk` is the unified client for the eight sub-products that
 make up the Voyant Data product, all served behind a single hostname:
 
 - `client.air` — aviation reference data (airports, airlines, aircraft)
@@ -27,13 +27,13 @@ make up the Voyant Data product, all served behind a single hostname:
 ## Install
 
 ```sh
-pnpm add @voyantjs/data-sdk
+pnpm add @voyant-travel/data-sdk
 ```
 
 ## Usage
 
 ```ts
-import { createVoyantDataClient } from "@voyantjs/data-sdk";
+import { createVoyantDataClient } from "@voyant-travel/data-sdk";
 
 const client = createVoyantDataClient({
   apiKey: process.env.VOYANT_API_KEY!,
@@ -112,7 +112,7 @@ Useful exported types include:
 
 ## Notes
 
-- default base URL is `https://api.voyantjs.com`
+- default base URL is `https://api.voyant.travel`
 - request auth defaults to `authorization: Bearer <apiKey>`
 - API tokens are scoped per sub-product (`data:air:read`,
   `data:fx:read`, `data:seo:read`, `data:reviews:read`,

@@ -15,7 +15,7 @@ app structure.
 
 Current design:
 
-- `@voyantjs/data-sdk` has a root client plus operation-scoped groups
+- `@voyant-travel/data-sdk` has a root client plus operation-scoped groups
   (`countries`, `regions`, `cities`, `airports`, `airlines`, `aircraft`,
   `languages`, `currencies`, `timezones`, `geographicRegions`, `fx`, `seo`)
 - shared request machinery lives in `sdk-core`
@@ -23,7 +23,7 @@ Current design:
 ## Why not one client type for everything
 
 One giant client would make package boundaries and auth stories less clear.
-Splitting per Voyant product (`@voyantjs/data-sdk`, future hosted-service
+Splitting per Voyant product (`@voyant-travel/data-sdk`, future hosted-service
 SDKs) keeps the auth scopes, the publish cadence, and the docs cleanly
 separable.
 

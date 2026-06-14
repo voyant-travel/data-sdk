@@ -23,7 +23,7 @@ function verifyRootReadme() {
 
   const required = [
     "# Voyant Data SDK",
-    "`@voyantjs/data-sdk`",
+    "`@voyant-travel/data-sdk`",
     "`@voyant-sdk/sdk-core`",
     "pnpm verify",
     "pnpm release",
@@ -55,7 +55,7 @@ function verifyPackageReadme({
     `pnpm add ${packageName}`,
     factoryName,
     envVar,
-    "https://api.voyantjs.com",
+    "https://api.voyant.travel",
     docLink,
   ];
 
@@ -147,7 +147,7 @@ function verifyMarkdownExamplesTypecheck() {
 
   try {
     const nodeModulesDir = path.join(tempDir, "node_modules");
-    const voyantJsDir = path.join(nodeModulesDir, "@voyantjs");
+    const voyantJsDir = path.join(nodeModulesDir, "@voyant-travel");
 
     mkdirSync(nodeModulesDir, { recursive: true });
     mkdirSync(voyantJsDir, { recursive: true });
@@ -218,7 +218,7 @@ function verifyMarkdownExamplesTypecheck() {
 verifyRootReadme();
 verifyPackageReadme({
   path: "packages/data-sdk/README.md",
-  packageName: "@voyantjs/data-sdk",
+  packageName: "@voyant-travel/data-sdk",
   factoryName: "createVoyantDataClient",
   docLink: "[../../docs/data.md](../../docs/data.md)",
   envVar: "VOYANT_API_KEY",

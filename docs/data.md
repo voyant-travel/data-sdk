@@ -1,11 +1,11 @@
 # Data SDK
 
-`@voyantjs/data-sdk` is the public TypeScript client for the Voyant Data APIs.
+`@voyant-travel/data-sdk` is the public TypeScript client for the Voyant Data APIs.
 
 ## Sub-products
 
 The Voyant Data product is composed of eight Cloudflare Workers served
-behind the public gateway at `https://api.voyantjs.com/data/{product}/v1/*`:
+behind the public gateway at `https://api.voyant.travel/data/{product}/v1/*`:
 
 - `air` — aviation reference data (airports, airlines, aircraft)
 - `fx` — currency exchange (exchangerate-api.com white-label, `/data/fx/v1/fx/*`) + the ISO 4217 currency catalog (`/data/fx/v1/currencies`)
@@ -68,7 +68,7 @@ API tokens are scoped per sub-product:
 ## Example
 
 ```ts
-import { createVoyantDataClient } from "@voyantjs/data-sdk";
+import { createVoyantDataClient } from "@voyant-travel/data-sdk";
 
 const client = createVoyantDataClient({
   apiKey: process.env.VOYANT_API_KEY!,

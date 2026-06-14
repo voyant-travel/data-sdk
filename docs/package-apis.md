@@ -2,7 +2,7 @@
 
 This document is a compact map of the current SDK surface.
 
-## `@voyantjs/data-sdk`
+## `@voyant-travel/data-sdk`
 
 Root client:
 

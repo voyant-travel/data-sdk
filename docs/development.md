@@ -25,8 +25,8 @@ available.
 Run a single package if needed:
 
 ```sh
-pnpm --filter @voyantjs/data-sdk check-types
-pnpm --filter @voyantjs/data-sdk lint
+pnpm --filter @voyant-travel/data-sdk check-types
+pnpm --filter @voyant-travel/data-sdk lint
 ```
 
 ## Workspace structure

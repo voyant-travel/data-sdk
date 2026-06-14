@@ -18,7 +18,7 @@ const packDir = mkdtempSync(path.join(tmpdir(), "voyant-sdk-pack-"));
 const packages = [
   {
     dir: path.join(repoRoot, "packages", "data-sdk"),
-    expectedName: "@voyantjs/data-sdk",
+    expectedName: "@voyant-travel/data-sdk",
   },
 ];
 
@@ -101,7 +101,7 @@ function verifyInstalledImports(tarballs) {
         "-e",
         `
           import assert from "node:assert/strict";
-          import { createVoyantDataClient } from "@voyantjs/data-sdk";
+          import { createVoyantDataClient } from "@voyant-travel/data-sdk";
 
           const data = createVoyantDataClient({ apiKey: "data_key" });
 
@@ -231,7 +231,7 @@ function verifyInstalledTypecheck(tarballs) {
           type TripadvisorSearchRequest,
           type TrustpilotSearchRequest,
           type VoyantDataClientOptions,
-        } from "@voyantjs/data-sdk";
+        } from "@voyant-travel/data-sdk";
 
         const client: VoyantDataClient = createVoyantDataClient({
           apiKey: "data_key",
