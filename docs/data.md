@@ -50,6 +50,10 @@ nextCursor? }`); `get(id)` returns `SingleResponse<T>` (`{ data }`).
   `TrustpilotSearchRequest`, `GoogleHotelSearchesRequest`,
   `TripadvisorSearchRequest`, `TripadvisorReviewsRequest`,
   `TripadvisorReferenceLocation`
+- hotels (typed response): `GoogleHotelSearchesResult`, `HotelSearchItem`,
+  `HotelSearchPrice` — the first vertical with a concrete `result` type
+  (per-night `prices`, `stars`, `reviews`, `images`); other verticals still
+  return an opaque `result`.
 - errors: `DataErrorCode`
 
 ## Auth scopes
