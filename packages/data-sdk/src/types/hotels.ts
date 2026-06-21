@@ -65,8 +65,8 @@ export interface GoogleHotelSearchesResult {
 // ---------------------------------------------------------------------------
 
 export interface GoogleHotelInfoInput {
-  /** The hotel's name (required to resolve the listing). */
-  keyword: string;
+  /** Stable Google Hotels id from a hotel-search result (`HotelSearchItem.hotelIdentifier`). */
+  hotelIdentifier: string;
   location?: LocationInput;
   language?: LanguageInput;
   /** Response format. `advanced` (default) returns structured data. */
