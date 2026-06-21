@@ -51,9 +51,12 @@ nextCursor? }`); `get(id)` returns `SingleResponse<T>` (`{ data }`).
   `TripadvisorSearchRequest`, `TripadvisorReviewsRequest`,
   `TripadvisorReferenceLocation`
 - hotels (typed response): `GoogleHotelSearchesResult`, `HotelSearchItem`,
-  `HotelSearchPrice` — the first vertical with a concrete `result` type
-  (per-night `prices`, `stars`, `reviews`, `images`); other verticals still
-  return an opaque `result`.
+  `HotelSearchPrice`, `GoogleHotelInfoResult`, `HotelInfoItem`, `HotelOffer`,
+  `HotelOfferOption`, `HotelAmenityCategory` — both Google Hotels endpoints have
+  concrete `result` types (search: per-night `prices`, `stars`, `reviews`,
+  `images`; info: description, amenities, gallery, reviews, and per-provider
+  `offers` with room/rate `options`). Other verticals still return an opaque
+  `result`.
 - errors: `DataErrorCode`
 
 ## Auth scopes

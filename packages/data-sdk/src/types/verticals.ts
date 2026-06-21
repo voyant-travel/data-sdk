@@ -9,6 +9,8 @@
  */
 
 import type {
+  GoogleHotelInfoInput,
+  GoogleHotelInfoResult,
   GoogleHotelSearchesInput,
   GoogleHotelSearchesResult,
 } from "./hotels.js";
@@ -74,8 +76,11 @@ export type GoogleHotelSearches = VerticalAsyncResource<
   GoogleHotelSearchesResult
 >;
 
-export type GoogleHotelInfoRequest = OpaqueRecord;
-export type GoogleHotelInfo = VerticalAsyncResource<GoogleHotelInfoRequest>;
+export type GoogleHotelInfoRequest = GoogleHotelInfoInput;
+export type GoogleHotelInfo = VerticalAsyncResource<
+  GoogleHotelInfoRequest,
+  GoogleHotelInfoResult
+>;
 
 // ───────────────────────────────────────────────────────────────
 // TripAdvisor — shared shape across hotels / restaurants / experiences
