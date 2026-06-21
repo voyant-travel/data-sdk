@@ -4,3 +4,4 @@ export * from "./fx.js";
 export * from "./seo.js";
 export * from "./geo.js";
 export * from "./verticals.js";
+export * from "./hotels.js";

@@ -3,26 +3,39 @@
  *
  * The verticals share an async-resource shape: a `*Request` payload submitted
  * via `create`, polled via `list`/`get`, and (for the live-capable ones) also
- * `run` for synchronous execution. All result envelopes are kept opaque to
- * tolerate provider-side passthrough drift; concrete fields live in the docs
- * and on the resource records themselves.
+ * `run` for synchronous execution. Result envelopes are being migrated off the
+ * opaque `OpaqueRecord` to concrete per-vertical types (see issue #26); Google
+ * Hotels is typed first and the rest still default to the opaque shape.
  */
 
-import type { OpaqueRecord, ResolvedLanguage, ResolvedLocation } from "./seo.js";
+import type {
+  GoogleHotelSearchesInput,
+  GoogleHotelSearchesResult,
+} from "./hotels.js";
+import type {
+  OpaqueRecord,
+  ResolvedLanguage,
+  ResolvedLocation,
+} from "./seo.js";
 
-export type VerticalAsyncStatus =
-  | "queued"
-  | "running"
-  | "succeeded"
-  | "failed";
+export type VerticalAsyncStatus = "queued" | "running" | "succeeded" | "failed";
 
-export interface VerticalAsyncResource<TRequest = OpaqueRecord> {
+/** Webhook subscription submitted with a vertical async request. */
+export interface VerticalWebhookConfig {
+  url: string;
+  secretId?: string;
+}
+
+export interface VerticalAsyncResource<
+  TRequest = OpaqueRecord,
+  TResult = OpaqueRecord,
+> {
   id: string;
   status: VerticalAsyncStatus;
   createdAt: string;
   completedAt?: string | null;
   request: TRequest;
-  result?: OpaqueRecord | null;
+  result?: TResult | null;
   cost?: { credits: number } | null;
   error?: { code: string; message: string };
   webhook?: {
@@ -55,9 +68,11 @@ export type TrustpilotReviews = VerticalAsyncResource<TrustpilotReviewsRequest>;
 // Hotels — Google Hotels + TripAdvisor
 // ───────────────────────────────────────────────────────────────
 
-export type GoogleHotelSearchesRequest = OpaqueRecord;
-export type GoogleHotelSearches =
-  VerticalAsyncResource<GoogleHotelSearchesRequest>;
+export type GoogleHotelSearchesRequest = GoogleHotelSearchesInput;
+export type GoogleHotelSearches = VerticalAsyncResource<
+  GoogleHotelSearchesRequest,
+  GoogleHotelSearchesResult
+>;
 
 export type GoogleHotelInfoRequest = OpaqueRecord;
 export type GoogleHotelInfo = VerticalAsyncResource<GoogleHotelInfoRequest>;
@@ -67,8 +82,7 @@ export type GoogleHotelInfo = VerticalAsyncResource<GoogleHotelInfoRequest>;
 // ───────────────────────────────────────────────────────────────
 
 export type TripadvisorSearchRequest = OpaqueRecord;
-export type TripadvisorSearch =
-  VerticalAsyncResource<TripadvisorSearchRequest>;
+export type TripadvisorSearch = VerticalAsyncResource<TripadvisorSearchRequest>;
 
 export type TripadvisorReviewsRequest = OpaqueRecord;
 export type TripadvisorReviews =
