@@ -1,5 +1,13 @@
 # @voyant-travel/data-sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- 4228887: `GoogleHotelInfoInput` now keys off `hotelIdentifier` (the stable id from a
+  hotel-search result) instead of `keyword` — DataForSEO's hotel-info endpoint
+  looks a hotel up by identifier, not by name.
+
 ## 0.7.0
 
 ### Minor Changes
