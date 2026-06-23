@@ -240,6 +240,7 @@
     "POST /data/hotels/v1/tripadvisor/searches"
   ],
   "restaurants": [
+    "POST /data/restaurants/v1/google/restaurant-searches:run",
     "GET /data/restaurants/v1/tripadvisor/reference/languages",
     "GET /data/restaurants/v1/tripadvisor/reference/locations",
     "GET /data/restaurants/v1/tripadvisor/reference/locations/:countryCode",

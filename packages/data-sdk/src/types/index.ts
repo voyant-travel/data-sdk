@@ -5,3 +5,4 @@ export * from "./seo.js";
 export * from "./geo.js";
 export * from "./verticals.js";
 export * from "./hotels.js";
+export * from "./restaurants.js";

@@ -120,6 +120,8 @@ import type {
   GoogleHotelSearches,
   GoogleHotelSearchesRequest,
   GoogleMapsSearchInput,
+  GoogleRestaurantSearchesInput,
+  GoogleRestaurantSearchesResult,
   GoogleMyBusinessInfo,
   GoogleMyBusinessInfoRequest,
   GoogleMyBusinessUpdates,
@@ -292,6 +294,7 @@ export class VoyantDataClient {
   readonly hotels: ReturnType<VoyantDataClient["buildHotels"]>;
   readonly restaurants: {
     tripadvisor: ReturnType<VoyantDataClient["buildTripadvisorVertical"]>;
+    google: ReturnType<VoyantDataClient["buildGoogleRestaurants"]>;
   };
   readonly experiences: {
     tripadvisor: ReturnType<VoyantDataClient["buildTripadvisorVertical"]>;
@@ -313,6 +316,7 @@ export class VoyantDataClient {
     this.hotels = this.buildHotels();
     this.restaurants = {
       tripadvisor: this.buildTripadvisorVertical(RESTAURANTS),
+      google: this.buildGoogleRestaurants(),
     };
     this.experiences = {
       tripadvisor: this.buildTripadvisorVertical(EXPERIENCES),
@@ -1887,6 +1891,24 @@ export class VoyantDataClient {
         },
       },
       tripadvisor: this.buildTripadvisorVertical(HOTELS),
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Restaurants — live Google Maps search (no async lifecycle).
+  // ─────────────────────────────────────────────────────────────
+
+  private buildGoogleRestaurants() {
+    const t = this.transport;
+    return {
+      restaurantSearches: {
+        /** Live restaurant search — returns results immediately. */
+        run: (request: GoogleRestaurantSearchesInput) =>
+          t.request<SingleResponse<GoogleRestaurantSearchesResult>>(
+            `${RESTAURANTS}/google/restaurant-searches:run`,
+            { method: "POST", body: request, unwrapData: false },
+          ),
+      },
     };
   }
 
