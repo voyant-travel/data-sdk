@@ -1,5 +1,14 @@
 # @voyant-travel/data-sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- 8d08550: Add the live Google Maps restaurant search vertical:
+  `client.restaurants.google.restaurantSearches.run({ query, location, ... })`
+  returns typed `RestaurantSearchItem`s (rating, cuisines, price tier, photo,
+  address, phone, open status, booking link).
+
 ## 0.7.1
 
 ### Patch Changes
