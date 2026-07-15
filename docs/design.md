@@ -17,7 +17,7 @@ Current design:
 
 - `@voyant-travel/data-sdk` has a root client plus operation-scoped groups
   (`countries`, `regions`, `cities`, `airports`, `airlines`, `aircraft`,
-  `languages`, `currencies`, `timezones`, `geographicRegions`, `fx`, `seo`)
+  `languages`, `currencies`, `timezones`, `geographicRegions`, `fx`)
 - shared request machinery lives in `sdk-core`
 
 ## Why not one client type for everything
@@ -27,12 +27,10 @@ Splitting per Voyant product (`@voyant-travel/data-sdk`, future hosted-service
 SDKs) keeps the auth scopes, the publish cadence, and the docs cleanly
 separable.
 
-## Why static typing for static + fx, generic for SEO
+## Why static typing across the surface
 
-- `static` and `fx` have stable, hand-curated route surfaces — typing them
-  pays for itself in autocomplete and request validation.
-- `seo` is hundreds of manifest-driven proxy routes; a generic typed
-  pass-through stays in sync without per-route code churn.
+- The Data sub-products have stable, hand-curated route surfaces — typing
+  them pays for itself in autocomplete and request validation.
 
 ## Naming rule
 

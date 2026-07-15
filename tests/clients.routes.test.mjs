@@ -4,8 +4,8 @@ import test from "node:test";
 import { createVoyantDataClient } from "../packages/data-sdk/dist/index.js";
 
 /**
- * The data client is namespaced per sub-product (`air`, `fx`, `seo`,
- * `reviews`, `hotels`, `restaurants`, `experiences`, `geo`). These smoke tests
+ * The data client is namespaced per sub-product (`air`, `fx`, `reviews`,
+ * `hotels`, `restaurants`, `experiences`, `geo`). These smoke tests
  * record the URL + method seen by the transport for one representative
  * call in each top-level namespace. They do not exhaust every method —
  * `verify-client-route-coverage` enforces per-route parity against the
@@ -172,40 +172,6 @@ test("fx — returns camelCase fields when the worker forwards snake_case JSON",
     conversionRate: 1.08,
     conversionResult: 108,
     timeLastUpdateUnix: 1710000000,
-  });
-});
-
-test("seo — typed SERP namespace composes the locations + organic search routes", async () => {
-  const recorder = createRecorder({
-    responseBody: { data: [], totalCount: 0 },
-  });
-  const client = createVoyantDataClient({
-    apiKey: "seo_key",
-    fetch: recorder.fetch,
-  });
-
-  await client.seo.serp.google.locations.list({ country: "US" });
-  await client.seo.serp.google.organic.searches.create({
-    keyword: "voyant",
-    locationCode: 2840,
-    languageCode: "en",
-  });
-
-  assert.equal(
-    recorder.calls[0].url,
-    "https://api.voyant.travel/data/seo/v1/serp/google/locations?country=US",
-  );
-  assert.equal(recorder.calls[0].method, "GET");
-
-  assert.equal(
-    recorder.calls[1].url,
-    "https://api.voyant.travel/data/seo/v1/serp/google/organic/searches",
-  );
-  assert.equal(recorder.calls[1].method, "POST");
-  assert.deepEqual(JSON.parse(recorder.calls[1].body), {
-    keyword: "voyant",
-    locationCode: 2840,
-    languageCode: "en",
   });
 });
 

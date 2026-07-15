@@ -14,9 +14,8 @@ should only depend on exported contracts derived from that implementation.
 - `generated/public-routes.json`: flat list of public routes (method + path)
   scraped from `voyant-cloud`. Consumed by `verify:api-parity` (server-side
   drift) and `verify:client-route-coverage` (SDK-side drift).
-- The manifest is keyed by sub-product (`static`, `fx`). The SEO sub-product
-  is intentionally not enumerated — it is manifest-driven on the server and
-  exposed by the SDK as a generic typed pass-through.
+- The manifest is keyed by sub-product (`air`, `fx`, `geo`, `reviews`,
+  `hotels`, `restaurants`, `experiences`).
 
 ## Rules
 

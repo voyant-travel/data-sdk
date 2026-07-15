@@ -32,7 +32,7 @@ rather than application behavior.
 The repo includes Node-native smoke tests under `tests/` that exercise:
 
 - `sdk-core` transport behavior against mocked `fetch`
-- Data client route composition (`countries`, `airports`, `fx`, `seo`)
+- Data client route composition (`countries`, `airports`, `fx`, `reviews`)
 - envelope handling for list and single-item endpoints
 
 ## Good test boundaries

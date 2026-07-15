@@ -67,8 +67,8 @@ function installPackedPackage(appDir, tarballPath, packageName) {
 }
 
 /**
- * Confirms the public package, when installed, exposes the seven top-level
- * sub-product namespaces (`static`, `fx`, `seo`, `reviews`, `hotels`,
+ * Confirms the public package, when installed, exposes the top-level
+ * sub-product namespaces (`air`, `fx`, `geo`, `reviews`, `hotels`,
  * `restaurants`, `experiences`) and a representative method on each. The
  * full per-route surface is verified by `verify:client-route-coverage`.
  */
@@ -128,18 +128,6 @@ function verifyInstalledImports(tarballs) {
           assert.equal(typeof data.fx.quota, "function");
           assert.equal(typeof data.fx.currencies.list, "function");
           assert.equal(typeof data.fx.currencies.get, "function");
-
-          // seo
-          assert.equal(typeof data.seo.serp.google.organic.searches.create, "function");
-          assert.equal(typeof data.seo.serp.google.organic.searches.screenshot, "function");
-          assert.equal(typeof data.seo.keywordsData.googleAds.searchVolume.create, "function");
-          assert.equal(typeof data.seo.aiOptimization.aiKeywordData.keywordVolumes.create, "function");
-          assert.equal(typeof data.seo.backlinks.summary.create, "function");
-          assert.equal(typeof data.seo.dataforseoLabs.google.keywordOverview.create, "function");
-          assert.equal(typeof data.seo.onPage.siteAudits.create, "function");
-          assert.equal(typeof data.seo.businessData.google.myBusinessInfo.create, "function");
-          assert.equal(typeof data.seo.contentAnalysis.search.create, "function");
-          assert.equal(typeof data.seo.domainAnalytics.whois.list.create, "function");
 
           // verticals
           assert.equal(typeof data.reviews.google.reviews.create, "function");
@@ -225,7 +213,6 @@ function verifyInstalledTypecheck(tarballs) {
           type GoogleReviewsRequest,
           type LanguageEntry,
           type ListResponse,
-          type Search,
           type SingleResponse,
           type TimezoneEntry,
           type TripadvisorSearchRequest,
@@ -259,10 +246,6 @@ function verifyInstalledTypecheck(tarballs) {
         const fxLatestPromise: Promise<FxLatestResponse> = client.fx.latest("EUR");
         const fxPairPromise: Promise<FxPairResponse> = client.fx.pair("EUR", "USD", 100);
 
-        // seo (typed namespaces)
-        const serpCreatePromise: Promise<SingleResponse<Search>> =
-          client.seo.serp.google.organic.searches.create({} as never);
-
         // verticals — opaque request envelopes
         const googleReviewsReq: GoogleReviewsRequest = {} as GoogleReviewsRequest;
         const googleQaReq: GoogleQaRequest = {} as GoogleQaRequest;
@@ -288,7 +271,6 @@ function verifyInstalledTypecheck(tarballs) {
         void timezonesPromise;
         void fxLatestPromise;
         void fxPairPromise;
-        void serpCreatePromise;
         void airportType;
         void aircraftCategory;
       `,

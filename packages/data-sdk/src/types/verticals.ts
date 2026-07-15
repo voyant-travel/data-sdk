@@ -18,7 +18,7 @@ import type {
   OpaqueRecord,
   ResolvedLanguage,
   ResolvedLocation,
-} from "./seo.js";
+} from "./common.js";
 
 export type VerticalAsyncStatus = "queued" | "running" | "succeeded" | "failed";
 

@@ -7,7 +7,7 @@
  * platform `data-contract` `RestaurantSearchItem`.
  */
 
-import type { LanguageInput, LocationInput } from "./seo.js";
+import type { LanguageInput, LocationInput } from "./common.js";
 import type { VerticalWebhookConfig } from "./verticals.js";
 
 export interface GoogleRestaurantSearchesInput {

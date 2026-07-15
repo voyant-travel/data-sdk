@@ -15,8 +15,6 @@ and final consumer polish.
 
 ## Data SDK follow-up
 
-- decide whether to ship typed wrappers for the most-used DataForSEO
-  endpoints (currently a generic pass-through under `client.seo`)
 - add narrower error types per `DataErrorCode` so consumers can switch on
   them without parsing the response body
 - evaluate whether `LightCountry` should stay separate from `Country` or

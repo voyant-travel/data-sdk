@@ -21,8 +21,8 @@ generation.
 
 ## Package boundaries
 
-- `@voyant-travel/data-sdk` is for the Voyant Data product (`/data/static`,
-  `/data/fx`, `/data/seo`)
+- `@voyant-travel/data-sdk` is for the Voyant Data product (`/data/air`,
+  `/data/fx`, `/data/geo`, and the review/hotel/restaurant/experience verticals)
 - `@voyant-sdk/sdk-core` is private and should contain only transport-level
   concerns
 

@@ -47,3 +47,43 @@ export type AsyncJobStatus =
   | "running"
   | "succeeded"
   | "failed";
+
+/**
+ * Opaque passthrough envelope. Used where the wire shape mirrors an upstream
+ * provider response and isn't worth statically modeling in the SDK.
+ */
+export type OpaqueRecord = Record<string, unknown>;
+
+/** A resolved reference location (DFS-style numeric code + names). */
+export interface ResolvedLocation {
+  /** Numeric location code (`location_code` upstream). */
+  id: number;
+  name: string;
+  /** ISO 3166-1 alpha-2 of the parent country, when applicable. */
+  countryIso2?: string;
+  type?: string;
+  parent?: number;
+}
+
+/** A resolved reference language (BCP-47 / short code + name). */
+export interface ResolvedLanguage {
+  /** BCP-47 / short language code (`language_code` upstream). */
+  code: string;
+  name: string;
+}
+
+export interface CoordinateInput {
+  latitude: number;
+  longitude: number;
+  radius?: number;
+  zoom?: number;
+}
+
+/** Location selector accepted by search-style requests. */
+export type LocationInput =
+  | { id: number }
+  | { name: string }
+  | { coordinate: CoordinateInput };
+
+/** Language selector accepted by search-style requests. */
+export type LanguageInput = { code: string } | { name: string };
