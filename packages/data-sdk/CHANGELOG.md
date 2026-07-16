@@ -1,5 +1,16 @@
 # @voyant-travel/data-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- f8bda89: Remove the `seo` namespace (SERP, keyword research, backlinks, on-page, domain
+  analytics, content analysis, business data, DataForSEO Labs). Voyant Data is a
+  travel-data SDK; the SEO tooling has been retired. Shared reference types
+  (`LocationInput`, `LanguageInput`, `ResolvedLocation`, `ResolvedLanguage`,
+  `OpaqueRecord`) that the hotels/restaurants/verticals namespaces depended on now
+  live in the neutral `types/common` module.
+
 ## 0.8.0
 
 ### Minor Changes
