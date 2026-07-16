@@ -43,12 +43,6 @@ Root client:
 - `client.fx.codes()`
 - `client.fx.quota()`
 
-### DataForSEO passthrough (`/data/seo/v1`)
-
-- `client.seo.get<T>(path, options?)`
-- `client.seo.post<T>(path, body, options?)`
-- `client.seo.request<T>(method, path, options?)`
-
 ## Selected public types
 
 - `Airport`, `AirportType`, `Airline`, `Aircraft`, `AircraftCategory`
@@ -56,6 +50,5 @@ Root client:
 - `LanguageEntry`, `CurrencyEntry`, `TimezoneEntry`
 - `ListResponse<T>`, `SingleResponse<T>`
 - `FxResponse`, `FxHistoryParams`
-- `SeoTaskResponse`, `SeoRequestOptions`
 - `DataErrorCode`
 - `VoyantDataClientOptions`

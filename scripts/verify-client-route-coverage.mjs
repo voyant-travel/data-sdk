@@ -206,9 +206,9 @@ function expandSpanExpression(expression, prefixes) {
  * like
  *
  *   const post = (suffix: string) => ({
- *     create: () => t.request(\`${SEO}/backlinks/${suffix}\`, ...)
+ *     create: () => t.request(\`${REVIEWS}/\${suffix}\`, ...)
  *   });
- *   post("anchors"); post("history"); …
+ *   post("google/reviews"); post("trustpilot/reviews"); …
  *
  * extract correctly. The reference to `suffix` lives inside the inner
  * `create` arrow but is bound by the outer `post` arrow, so we walk every
@@ -377,7 +377,6 @@ function extractClientRoutes(filePath) {
   function classifyProduct(expanded) {
     if (expanded.startsWith("/data/air/")) return "air";
     if (expanded.startsWith("/data/fx/")) return "fx";
-    if (expanded.startsWith("/data/seo/")) return "seo";
     if (expanded.startsWith("/data/reviews/")) return "reviews";
     if (expanded.startsWith("/data/hotels/")) return "hotels";
     if (expanded.startsWith("/data/restaurants/")) return "restaurants";
@@ -452,7 +451,6 @@ for (const [route, product] of clientRoutesByProduct) {
 const productOrder = [
   "air",
   "fx",
-  "seo",
   "reviews",
   "hotels",
   "restaurants",

@@ -8,8 +8,9 @@ Markdown under [`docs/`](./docs).
 
 ## Packages
 
-- `@voyant-travel/data-sdk`: client for the Voyant Data APIs (`/data/static`,
-  `/data/fx`, `/data/seo`)
+- `@voyant-travel/data-sdk`: client for the Voyant Data APIs (`/data/air`,
+  `/data/fx`, `/data/geo`, `/data/reviews`, `/data/hotels`,
+  `/data/restaurants`, `/data/experiences`)
 - `@voyant-sdk/sdk-core`: private shared runtime bundled into the public
   package
 

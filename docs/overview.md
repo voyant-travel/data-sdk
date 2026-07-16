@@ -9,6 +9,6 @@ public SDK boundary stays clean.
 
 ## Package boundaries
 
-- `@voyant-travel/data-sdk` wraps the Voyant Data APIs (`/data/static`,
-  `/data/fx`, `/data/seo`).
+- `@voyant-travel/data-sdk` wraps the Voyant Data APIs (`/data/air`,
+  `/data/fx`, `/data/geo`, and the review/hotel/restaurant/experience verticals).
 - `@voyant-sdk/sdk-core` contains shared request plumbing only.

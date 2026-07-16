@@ -15,12 +15,6 @@ of the public support surface.
 Because this repo is public and the SDK should depend on public contracts,
 not private application internals.
 
-## Why does the SDK only enumerate `static` and `fx` routes?
-
-The third sub-product, `seo`, is a proxy to DataForSEO with hundreds of
-manifest-driven endpoints. Mirroring every route by hand would be churn for
-no ergonomic gain. The `seo` group exposes a typed pass-through instead.
-
 ## Why does the FX path contain `/fx/` twice?
 
 The public path for FX endpoints is `/data/fx/v1/fx/...`. This is a

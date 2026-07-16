@@ -4,14 +4,11 @@ Public TypeScript client for the Voyant Data APIs.
 
 ## Scope
 
-`@voyant-travel/data-sdk` is the unified client for the eight sub-products that
+`@voyant-travel/data-sdk` is the unified client for the sub-products that
 make up the Voyant Data product, all served behind a single hostname:
 
 - `client.air` — aviation reference data (airports, airlines, aircraft)
 - `client.fx` — currency exchange (exchangerate-api.com white-label)
-- `client.seo` — DataForSEO white-label, namespaced by sub-product
-  (`serp`, `keywordsData`, `aiOptimization`, `backlinks`, `domainAnalytics`,
-  `contentAnalysis`, `onPage`, `businessData`, `dataforseoLabs`)
 - `client.reviews` — Google Reviews + Trustpilot (async resources)
 - `client.hotels` — Google Hotels + TripAdvisor (async resources, plus a
   shared `tripadvisor.reference` catalog)
@@ -65,10 +62,6 @@ Every sub-product is a top-level namespace on the client:
 
 - aviation: `client.air.{airports,airlines,aircraft}`
 - currency exchange + ISO 4217 catalog: `client.fx.{latest,pair,enriched,history,codes,quota,currencies}`
-- SERP, keywords, AI optimization, backlinks, on-page, content analysis,
-  domain analytics, business data, dataforseo-labs:
-  `client.seo.{serp,keywordsData,aiOptimization,backlinks,onPage,
-contentAnalysis,domainAnalytics,businessData,dataforseoLabs}`
 - async-resource verticals (Reviews, Hotels, Restaurants, Experiences):
   `client.{reviews,hotels,restaurants,experiences}` with `create`/`list`/
   `get`/(some) `run` per resource
@@ -98,8 +91,6 @@ Useful exported types include:
   `PaginationParams`, `CountryFilteredPaginationParams`
 - fx: `FxLatestResponse`, `FxPairResponse`, `FxEnrichedResponse`,
   `FxHistoryResponse`, `FxCodesResponse`, `FxQuotaResponse`, `CurrencyEntry`
-- seo / serp: `Search`, `GoogleOrganicSearchInput`, `GoogleAiModeSearchInput`,
-  `GoogleMapsSearchInput`, `ScreenshotResult`, `AiSummaryResult`
 - verticals: `GoogleReviewsRequest`, `GoogleQaRequest`,
   `TrustpilotSearchRequest`, `GoogleHotelSearchesRequest`,
   `TripadvisorSearchRequest`, `TripadvisorReviewsRequest`,
@@ -115,7 +106,7 @@ Useful exported types include:
 - default base URL is `https://api.voyant.travel`
 - request auth defaults to `authorization: Bearer <apiKey>`
 - API tokens are scoped per sub-product (`data:air:read`,
-  `data:fx:read`, `data:seo:read`, `data:reviews:read`,
+  `data:fx:read`, `data:reviews:read`,
   `data:hotels:read`, `data:restaurants:read`, `data:experiences:read`,
   `data:geo:read`)
 - responses preserve the full `{ data, totalCount, nextCursor? }` envelope

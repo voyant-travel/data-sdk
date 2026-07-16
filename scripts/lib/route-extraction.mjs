@@ -50,12 +50,6 @@ export const products = [
     publicPrefix: "/data/fx",
   },
   {
-    key: "seo",
-    routesDir: "apps/data-seo-api/src/routes",
-    workerPrefix: "/seo",
-    publicPrefix: "/data/seo",
-  },
-  {
     key: "reviews",
     routesDir: "apps/data-reviews-api/src/routes",
     workerPrefix: "/reviews",
@@ -210,7 +204,7 @@ function extractFxManifestRoutes(filePath) {
 }
 
 /**
- * Generic file-local helper expansion. The SEO worker mounts several routes
+ * Generic file-local helper expansion. Some workers mount several routes
  * via tiny in-file helpers — `defineLocationsRoute(app, "/path", ...)`,
  * `defineLanguagesRoute(app, "/path", ...)`, etc — that take the route path
  * as a string argument. This walks the file twice:
@@ -299,53 +293,10 @@ function extractInFileHelperRoutes(source) {
   return routes;
 }
 
-/**
- * Cross-feature SERP search routes mounted by `serp-searches.ts` and
- * `serp-actions.ts`. Both files iterate a hard-coded `SUPPORTED_FEATURES`
- * list and register routes via template literals — too dynamic for the
- * literal-string extractor. Hard-coded against the worker's source so the
- * manifest captures the routes consumers actually see.
- */
-const SERP_FEATURES = [
-  "organic",
-  "ai-mode",
-  "maps",
-  "autocomplete",
-  "ads-advertisers",
-  "ads-search",
-];
-const SERP_ACTION_FEATURES = ["organic", "ai-mode", "maps"];
-
-function extractSerpSearchesRoutes() {
-  const routes = [];
-  for (const feature of SERP_FEATURES) {
-    const base = `/seo/v1/serp/google/${feature}/searches`;
-    routes.push({ method: "GET", route: `${base}/:id` });
-    routes.push({ method: "GET", route: base });
-  }
-  return routes;
-}
-
-function extractSerpActionsRoutes() {
-  const routes = [];
-  for (const feature of SERP_ACTION_FEATURES) {
-    const base = `/seo/v1/serp/google/${feature}/searches/:id`;
-    routes.push({ method: "POST", route: `${base}/screenshot` });
-    routes.push({ method: "POST", route: `${base}/ai-summary` });
-  }
-  return routes;
-}
-
 function extractFromFile(filePath) {
   const source = fs.readFileSync(filePath, "utf8");
   if (filePath.endsWith("fx-manifest.ts")) {
     return extractFxManifestRoutes(filePath);
-  }
-  if (filePath.endsWith("serp-searches.ts")) {
-    return extractSerpSearchesRoutes();
-  }
-  if (filePath.endsWith("serp-actions.ts")) {
-    return [...extractLiteralAppRoutes(source), ...extractSerpActionsRoutes()];
   }
   const consts = extractBasePathConstants(source);
   return [
@@ -360,15 +311,9 @@ function extractFromFile(filePath) {
 function rewriteToPublic(route, product) {
   if (route.includes("/internal/")) return null;
   if (route.endsWith("/health") || route === "/health") return null;
-  // DFS postback receivers — gateway-internal, never called by SDK consumers.
+  // Provider postback receivers — gateway-internal, never called by SDK
+  // consumers.
   if (route.includes("/postbacks/")) return null;
-  // Voyant Async Layer task tracking — exposed in the SEO worker but not part
-  // of the public consumer surface (consumers track jobs via the per-feature
-  // resources and the keywords-data jobs namespace).
-  if (route.includes("/voyant/tasks")) return null;
-  // Cross-feature SERP shot-id retrieval — served as a binary R2 stream, not
-  // a JSON route worth surfacing as a typed SDK method.
-  if (route.includes("/screenshots/")) return null;
   // The static `countries-light` route is a frontend-optimized variant; the
   // canonical shape lives under `/countries`. Not exposed by the SDK.
   if (route.endsWith("/countries-light")) return null;
